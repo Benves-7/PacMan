@@ -26,7 +26,7 @@ public:
 class Blinky: public Ghost //red
 {
   public:
-    Blinky(){ghostState = REDGHOST_HANDLE; x = GD.w/2-REDGHOST_WIDTH/2 ; y = 100 ;};  
+    Blinky();
     void update();
 };
 class Pinky: public Ghost //pink
@@ -51,7 +51,7 @@ class Clyde: public Ghost //orange
 class Dot
 {
 public:
-    Dot(int ix, int iy) {x = ix; y = iy;}
+    Dot(int ix, int iy, bool powerUp=false) {x = ix; y = iy; this->powerUp=powerUp;};
     int x, y;
     bool powerUp;
 };
@@ -59,7 +59,7 @@ public:
 class Intersection
 {
 public:
-    Intersection(){}
+    Intersection(){};
     Intersection(int iindex, int xpos, int ypos, int inorth, int ieast, int isouth, int iwest)
     {
         index = iindex;
@@ -73,6 +73,7 @@ public:
     int index;
     int x, y;
     int north, east, south, west;
+    int* neighbours[4] = {&north,&east,&south,&west};
 };
 
 class Map
@@ -87,10 +88,10 @@ Player pacMan;
 Map level;
 int xValue, yValue;
 int animationCounter;
-int MaxX, MaxY, size = 12; // size is sprite size in pixels.
-float speed = 0.08f;
+int MaxX, MaxY;
 long previusTime = 0, currentTime = 0;
 Ghost ghosts[4];
+bool dots[26][26] = {false};
 
 // Order of handels:
 // 0  >> PacMan state N.
@@ -174,6 +175,27 @@ void buildMap() {
     level.intersections[64] = Intersection(64, level.x + 104, level.y + 84 , -1, 24, -1, 23);
 }
 
+void makeDots()
+{
+  int current = 0;
+  
+  while(current <= 64)
+  {
+    Intersection* currentIntr = &level.intersections[current];
+    for(int i=0;i<4;i++)
+    {
+     Intersection* neighbour = &level.intersections[*currentIntr->neighbours[i]];
+     
+      if(neighbour->index < current)
+        continue;
+  
+    }
+
+    current++;
+  }
+  
+}
+
 void setup()
 {
     GD.begin();
@@ -181,13 +203,13 @@ void setup()
 
     // split all pacMan sprites into animation cells.
     GD.BitmapHandle(PMNORTH_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * size, size);
+    GD.BitmapLayout(ARGB4, 2 * 15, 15);
     GD.BitmapHandle(PMEAST_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * size, size);
+    GD.BitmapLayout(ARGB4, 2 * 15, 15);
     GD.BitmapHandle(PMSOUTH_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * size, size);
+    GD.BitmapLayout(ARGB4, 2 * 15, 15);
     GD.BitmapHandle(PMWEST_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * size, size);
+    GD.BitmapLayout(ARGB4, 2 * 15, 15);
 
     Serial.begin(9600);
 
@@ -196,6 +218,7 @@ void setup()
     level.x = MaxX/2 - 112;
     level.y = MaxY/2 - 124;
     buildMap();
+    makeDots();
     Serial.println(MaxX);
     Serial.println(MaxY);
 
@@ -227,22 +250,22 @@ void updatePlayer()
     if (pacMan.playerState == PMNORTH_HANDLE) // North
     {
         if (pacMan.y > 0) {
-            pacMan.y -= speed;
+            pacMan.y -= 0.1;
         }
     } else if (pacMan.playerState == PMEAST_HANDLE) // East
     {
-        if (pacMan.x < MaxX - size) {
-            pacMan.x += speed;
+        if (pacMan.x < MaxX - 15) {
+            pacMan.x += 0.1;
         }
     } else if (pacMan.playerState == PMSOUTH_HANDLE) // South
     {
-        if (pacMan.y < MaxY - size) {
-            pacMan.y += speed;
+        if (pacMan.y < MaxY - 15) {
+            pacMan.y += 0.1;
         }
     } else if (pacMan.playerState == PMWEST_HANDLE) // West
     {
         if (pacMan.x > 0) {
-            pacMan.x -= speed;
+            pacMan.x -= 0.1;
         }
     }
 
@@ -313,6 +336,8 @@ void Ghost::draw()
        else
         GD.Vertex2ii(this->x,this->y,this->ghostState);
     };
+
+Blinky::Blinky() {ghostState = REDGHOST_HANDLE; x =level.intersections[64].x ; y = level.intersections[64].y ;};
 
 void Blinky::update()
 {};
