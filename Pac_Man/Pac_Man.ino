@@ -59,6 +59,7 @@ public:
 class Intersection
 {
 public:
+    Intersection(){}
     Intersection(int iindex, int xpos, int ypos, int inorth, int ieast, int isouth, int iwest)
     {
         index = iindex;
@@ -86,7 +87,8 @@ Player pacMan;
 Map level;
 int xValue, yValue;
 int animationCounter;
-int MaxX, MaxY;
+int MaxX, MaxY, size = 12; // size is sprite size in pixels.
+float speed = 0.08f;
 long previusTime = 0, currentTime = 0;
 Ghost ghosts[4];
 
@@ -179,13 +181,13 @@ void setup()
 
     // split all pacMan sprites into animation cells.
     GD.BitmapHandle(PMNORTH_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * 15, 15);
+    GD.BitmapLayout(ARGB4, 2 * size, size);
     GD.BitmapHandle(PMEAST_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * 15, 15);
+    GD.BitmapLayout(ARGB4, 2 * size, size);
     GD.BitmapHandle(PMSOUTH_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * 15, 15);
+    GD.BitmapLayout(ARGB4, 2 * size, size);
     GD.BitmapHandle(PMWEST_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * 15, 15);
+    GD.BitmapLayout(ARGB4, 2 * size, size);
 
     Serial.begin(9600);
 
@@ -225,22 +227,22 @@ void updatePlayer()
     if (pacMan.playerState == PMNORTH_HANDLE) // North
     {
         if (pacMan.y > 0) {
-            pacMan.y -= 0.1;
+            pacMan.y -= speed;
         }
     } else if (pacMan.playerState == PMEAST_HANDLE) // East
     {
-        if (pacMan.x < MaxX - 15) {
-            pacMan.x += 0.1;
+        if (pacMan.x < MaxX - size) {
+            pacMan.x += speed;
         }
     } else if (pacMan.playerState == PMSOUTH_HANDLE) // South
     {
-        if (pacMan.y < MaxY - 15) {
-            pacMan.y += 0.1;
+        if (pacMan.y < MaxY - size) {
+            pacMan.y += speed;
         }
     } else if (pacMan.playerState == PMWEST_HANDLE) // West
     {
         if (pacMan.x > 0) {
-            pacMan.x -= 0.1;
+            pacMan.x -= speed;
         }
     }
 
