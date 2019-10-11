@@ -38,13 +38,13 @@ class Pinky: public Ghost //pink
 class Inky: public Ghost //blue
 {
   public:
-    Inky(){ghostState = BLUEGHOST_HANDLE; x = GD.w/2-BLUEGHOST_WIDTH/2 - PINKGHOST_WIDTH -5, y = 120;};
+    Inky(){ghostState = BLUEGHOST_HANDLE; x = GD.w/2-BLUEGHOST_WIDTH/2 - PINKGHOST_WIDTH -3, y = 120;};
     void update();
   };
 class Clyde: public Ghost //orange
 {
   public:
-    Clyde(){ghostState = YELLOWGHOST_HANDLE; x = GD.w/2-YELLOWGHOST_WIDTH/2 + PINKGHOST_WIDTH+5; y = 120;};
+    Clyde(){ghostState = YELLOWGHOST_HANDLE; x = GD.w/2-YELLOWGHOST_WIDTH/2 + PINKGHOST_WIDTH+3; y = 120;};
     void update();
 };
 
@@ -91,8 +91,7 @@ int animationCounter;
 int MaxX, MaxY;
 long previusTime = 0, currentTime = 0;
 Ghost ghosts[4];
-bool dots[26][26] = {false};
-
+bool dots[26*29];
 // Order of handels:
 // 0  >> PacMan state N.
 // 1  >> PacMan state E.
@@ -174,27 +173,209 @@ void buildMap() {
     level.intersections[63] = Intersection(63, level.x + 204, level.y + 228, 59, -1, -1, 62);
     level.intersections[64] = Intersection(64, level.x + 104, level.y + 84 , -1, 24, -1, 23);
 }
-
+#define ggr(x,y) for(int EnVariabelSomInteKommerFinnas = 0;EnVariabelSomInteKommerFinnas<x;EnVariabelSomInteKommerFinnas++){y;} 
+#define set dots[ x++ + y * 26 ] = true;
 void makeDots()
 {
+for(int x=0; x<26; x++)
+  {
+    for(int y=0; y<29; y++)
+    {
+      dots[x+26*y]=false;
+    }
+  }
+  int x=0;
+  int y= 0;
+
+    ggr(12,set) 
+    x++;
+    x++;
+    ggr(12,set) 
+
+    ggr(3,
+      y++;
+      dots[0 + y * 26 ] = true;
+      dots[5 + y * 26 ] = true;
+      dots[11 + y * 26 ] = true;
+    )
+    x=0;
+    y++;
+    ggr(26,set) 
+
+    ggr(2,
+          y++;
+  
+      dots[0 + y * 26 ] = true;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+      )
+
+    y++;
+    x=0;
+    ggr(6,set);
+    ggr(2,x++);
+    ggr(4,set)
+
+    ggr(2,
+        y++;
+        dots[5 + y * 26 ] = true;
+        dots[11 + y * 26 ] = true;
+    )
+    
+
+
+    y++;
+    x=5;
+    set;
+    ggr(2,x++)
+    ggr(5,set)
+    
+    ggr(2,
+      y++;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+      )
+
+    y++;
+    x=5;
+    ggr(4,set)
+
+    ggr(2,
+      y++;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+    )
+
+    y++; x=5;
+    set;
+    ggr(2,x++)
+    ggr(5,set)
+
+
+   ggr(2,
+    y++;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+    )
+ 
+   y++;x=0;
+   ggr(12,set)
+  
+   ggr(2,
+    y++;x=0;
+    dots[0 + y * 26 ] = true;
+    dots[5 + y * 26 ] = true;
+    dots[11 + y * 26 ] = true;
+    )
+
+    y++;x=0;
+    ggr(3,set)
+    ggr(2,x++)
+    ggr(10,set)
+
+    ggr(2,
+      y++;
+      dots[2 + y * 26 ] = true;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+    )
+
+    y++;x=0;
+    ggr(6,set)
+    ggr(2,x++)
+    ggr(4,set)
+
+    ggr(2,
+    y++;
+      dots[0 + y * 26 ] = true;
+      dots[11 + y * 26 ] = true;
+    )
+
+    y++;x=0;
+    ggr(24,set)
+    
+for(int x=0; x<13; x++)
+  {
+    for(int y=0; y<29; y++)
+    {
+      dots[25-x+26*y]=dots[x+26*y];
+    }
+  }
+/*
+  
   int current = 0;
   
-  while(current <= 64)
+  while(current < 64)
   {
     Intersection* currentIntr = &level.intersections[current];
+    
+      int x8= (currentIntr->x-level.x-4)/8;
+      int y8 = (currentIntr->y-level.y-4)/8;
+
+    
     for(int i=0;i<4;i++)
     {
-     Intersection* neighbour = &level.intersections[*currentIntr->neighbours[i]];
+     int index = *(currentIntr->neighbours[i]);
+     Serial.println("__________________");
+      delay(20);
+      Serial.println(index);
+    delay(20);
+     if(index == -1)
+      continue;
+     Intersection* neighbour = &level.intersections[index];
      
       if(neighbour->index < current)
         continue;
+      
+      int xdif = abs(x8 - (neighbour->x-level.x-4)/8); 
+      int ydif = abs(y8 - (neighbour->y-level.y-4)/8);  
+      
+
+delay(20);
+Serial.println(y8);
+delay(20);
+Serial.println((neighbour->y-level.y-4)/8);
+delay(20)    ;  
+      int x=0;
+      do
+      {
+        int y=0;
+        do
+        {
+          //Serial.println(x8+x+(26*(y8+y)));
+          dots[x8+x+(26*(y8+y))] = true;
+     
+          y+=1;
+        }
+        while(y<ydif);
+        x+=1;
+      }
+      while(x<xdif);
+      //Serial.println("__________________");
   
     }
 
     current++;
   }
-  
+  */
 }
+
+void drawDots()
+{
+  for(int x=0; x<26; x++)
+  {
+    for(int y=0; y<29; y++)
+    {
+      if(dots[x+26*y])
+      {
+        
+        GD.Vertex2ii(level.x+4+5+x*8, level.y+4+5+y*8, DOT_HANDLE);
+        //GD.Vertex2ii(100,100, DOT_HANDLE);
+      }
+    }
+  }
+}
+
 
 void setup()
 {
@@ -306,6 +487,7 @@ void draw()
     GD.Begin(BITMAPS);
     GD.Vertex2ii(level.x, level.y, 4);    //draw map in center of screen.
     GD.Vertex2ii(pacMan.x, pacMan.y, pacMan.playerState, pacMan.playerOpenState); // draw pacMan
+    drawDots();
     drawGhosts();
 }
 void checkSwapBuffer()
