@@ -26,7 +26,7 @@ public:
 class Blinky: public Ghost //red
 {
   public:
-    Blinky(){ghostState = REDGHOST_HANDLE; x = GD.w/2-REDGHOST_WIDTH/2 ; y = 100 ;};  
+    Blinky();
     void update();
 };
 class Pinky: public Ghost //pink
@@ -38,20 +38,20 @@ class Pinky: public Ghost //pink
 class Inky: public Ghost //blue
 {
   public:
-    Inky(){ghostState = BLUEGHOST_HANDLE; x = GD.w/2-BLUEGHOST_WIDTH/2 - PINKGHOST_WIDTH -5, y = 120;};
+    Inky(){ghostState = BLUEGHOST_HANDLE; x = GD.w/2-BLUEGHOST_WIDTH/2 - PINKGHOST_WIDTH -3, y = 120;};
     void update();
   };
 class Clyde: public Ghost //orange
 {
   public:
-    Clyde(){ghostState = YELLOWGHOST_HANDLE; x = GD.w/2-YELLOWGHOST_WIDTH/2 + PINKGHOST_WIDTH+5; y = 120;};
+    Clyde(){ghostState = YELLOWGHOST_HANDLE; x = GD.w/2-YELLOWGHOST_WIDTH/2 + PINKGHOST_WIDTH+3; y = 120;};
     void update();
 };
 
 class Dot
 {
 public:
-    Dot(int ix, int iy) {x = ix; y = iy;}
+    Dot(int ix, int iy, bool powerUp=false) {x = ix; y = iy; this->powerUp=powerUp;};
     int x, y;
     bool powerUp;
 };
@@ -59,7 +59,7 @@ public:
 class Intersection
 {
 public:
-    Intersection(){}
+    Intersection(){};
     Intersection(int iindex, int xpos, int ypos, int inorth, int ieast, int isouth, int iwest)
     {
         index = iindex;
@@ -73,6 +73,7 @@ public:
     int index;
     int x, y;
     int north, east, south, west;
+    int* neighbours[4] = {&north,&east,&south,&west};
 };
 
 class Map
@@ -87,11 +88,10 @@ Player pacMan;
 Map level;
 int xValue, yValue;
 int animationCounter;
-int MaxX, MaxY, size = 12; // size is sprite size in pixels.
-float speed = 0.08f;
+int MaxX, MaxY;
 long previusTime = 0, currentTime = 0;
 Ghost ghosts[4];
-
+bool dots[26*29];
 // Order of handels:
 // 0  >> PacMan state N.
 // 1  >> PacMan state E.
@@ -173,6 +173,209 @@ void buildMap() {
     level.intersections[63] = Intersection(63, level.x + 204, level.y + 228, 59, -1, -1, 62);
     level.intersections[64] = Intersection(64, level.x + 104, level.y + 84 , -1, 24, -1, 23);
 }
+#define ggr(x,y) for(int EnVariabelSomInteKommerFinnas = 0;EnVariabelSomInteKommerFinnas<x;EnVariabelSomInteKommerFinnas++){y;} 
+#define set dots[ x++ + y * 26 ] = true;
+void makeDots()
+{
+for(int x=0; x<26; x++)
+  {
+    for(int y=0; y<29; y++)
+    {
+      dots[x+26*y]=false;
+    }
+  }
+  int x=0;
+  int y= 0;
+
+    ggr(12,set) 
+    x++;
+    x++;
+    ggr(12,set) 
+
+    ggr(3,
+      y++;
+      dots[0 + y * 26 ] = true;
+      dots[5 + y * 26 ] = true;
+      dots[11 + y * 26 ] = true;
+    )
+    x=0;
+    y++;
+    ggr(26,set) 
+
+    ggr(2,
+          y++;
+  
+      dots[0 + y * 26 ] = true;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+      )
+
+    y++;
+    x=0;
+    ggr(6,set);
+    ggr(2,x++);
+    ggr(4,set)
+
+    ggr(2,
+        y++;
+        dots[5 + y * 26 ] = true;
+        dots[11 + y * 26 ] = true;
+    )
+    
+
+
+    y++;
+    x=5;
+    set;
+    ggr(2,x++)
+    ggr(5,set)
+    
+    ggr(2,
+      y++;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+      )
+
+    y++;
+    x=5;
+    ggr(4,set)
+
+    ggr(2,
+      y++;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+    )
+
+    y++; x=5;
+    set;
+    ggr(2,x++)
+    ggr(5,set)
+
+
+   ggr(2,
+    y++;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+    )
+ 
+   y++;x=0;
+   ggr(12,set)
+  
+   ggr(2,
+    y++;x=0;
+    dots[0 + y * 26 ] = true;
+    dots[5 + y * 26 ] = true;
+    dots[11 + y * 26 ] = true;
+    )
+
+    y++;x=0;
+    ggr(3,set)
+    ggr(2,x++)
+    ggr(10,set)
+
+    ggr(2,
+      y++;
+      dots[2 + y * 26 ] = true;
+      dots[5 + y * 26 ] = true;
+      dots[8 + y * 26 ] = true;
+    )
+
+    y++;x=0;
+    ggr(6,set)
+    ggr(2,x++)
+    ggr(4,set)
+
+    ggr(2,
+    y++;
+      dots[0 + y * 26 ] = true;
+      dots[11 + y * 26 ] = true;
+    )
+
+    y++;x=0;
+    ggr(24,set)
+    
+for(int x=0; x<13; x++)
+  {
+    for(int y=0; y<29; y++)
+    {
+      dots[25-x+26*y]=dots[x+26*y];
+    }
+  }
+/*
+  
+  int current = 0;
+  
+  while(current < 64)
+  {
+    Intersection* currentIntr = &level.intersections[current];
+    
+      int x8= (currentIntr->x-level.x-4)/8;
+      int y8 = (currentIntr->y-level.y-4)/8;
+
+    
+    for(int i=0;i<4;i++)
+    {
+     int index = *(currentIntr->neighbours[i]);
+     Serial.println("__________________");
+      delay(20);
+      Serial.println(index);
+    delay(20);
+     if(index == -1)
+      continue;
+     Intersection* neighbour = &level.intersections[index];
+     
+      if(neighbour->index < current)
+        continue;
+      
+      int xdif = abs(x8 - (neighbour->x-level.x-4)/8); 
+      int ydif = abs(y8 - (neighbour->y-level.y-4)/8);  
+      
+
+delay(20);
+Serial.println(y8);
+delay(20);
+Serial.println((neighbour->y-level.y-4)/8);
+delay(20)    ;  
+      int x=0;
+      do
+      {
+        int y=0;
+        do
+        {
+          //Serial.println(x8+x+(26*(y8+y)));
+          dots[x8+x+(26*(y8+y))] = true;
+     
+          y+=1;
+        }
+        while(y<ydif);
+        x+=1;
+      }
+      while(x<xdif);
+      //Serial.println("__________________");
+  
+    }
+
+    current++;
+  }
+  */
+}
+
+void drawDots()
+{
+  for(int x=0; x<26; x++)
+  {
+    for(int y=0; y<29; y++)
+    {
+      if(dots[x+26*y])
+      {
+        
+        GD.Vertex2ii(level.x+4+5+x*8, level.y+4+5+y*8, DOT_HANDLE);
+        //GD.Vertex2ii(100,100, DOT_HANDLE);
+      }
+    }
+  }
+}
+
 
 void setup()
 {
@@ -181,13 +384,13 @@ void setup()
 
     // split all pacMan sprites into animation cells.
     GD.BitmapHandle(PMNORTH_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * size, size);
+    GD.BitmapLayout(ARGB4, 2 * 15, 15);
     GD.BitmapHandle(PMEAST_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * size, size);
+    GD.BitmapLayout(ARGB4, 2 * 15, 15);
     GD.BitmapHandle(PMSOUTH_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * size, size);
+    GD.BitmapLayout(ARGB4, 2 * 15, 15);
     GD.BitmapHandle(PMWEST_HANDLE);
-    GD.BitmapLayout(ARGB4, 2 * size, size);
+    GD.BitmapLayout(ARGB4, 2 * 15, 15);
 
     Serial.begin(9600);
 
@@ -196,6 +399,7 @@ void setup()
     level.x = MaxX/2 - 112;
     level.y = MaxY/2 - 124;
     buildMap();
+    makeDots();
     Serial.println(MaxX);
     Serial.println(MaxY);
 
@@ -227,22 +431,22 @@ void updatePlayer()
     if (pacMan.playerState == PMNORTH_HANDLE) // North
     {
         if (pacMan.y > 0) {
-            pacMan.y -= speed;
+            pacMan.y -= 0.1;
         }
     } else if (pacMan.playerState == PMEAST_HANDLE) // East
     {
-        if (pacMan.x < MaxX - size) {
-            pacMan.x += speed;
+        if (pacMan.x < MaxX - 15) {
+            pacMan.x += 0.1;
         }
     } else if (pacMan.playerState == PMSOUTH_HANDLE) // South
     {
-        if (pacMan.y < MaxY - size) {
-            pacMan.y += speed;
+        if (pacMan.y < MaxY - 15) {
+            pacMan.y += 0.1;
         }
     } else if (pacMan.playerState == PMWEST_HANDLE) // West
     {
         if (pacMan.x > 0) {
-            pacMan.x -= speed;
+            pacMan.x -= 0.1;
         }
     }
 
@@ -283,6 +487,7 @@ void draw()
     GD.Begin(BITMAPS);
     GD.Vertex2ii(level.x, level.y, 4);    //draw map in center of screen.
     GD.Vertex2ii(pacMan.x, pacMan.y, pacMan.playerState, pacMan.playerOpenState); // draw pacMan
+    drawDots();
     drawGhosts();
 }
 void checkSwapBuffer()
@@ -313,6 +518,8 @@ void Ghost::draw()
        else
         GD.Vertex2ii(this->x,this->y,this->ghostState);
     };
+
+Blinky::Blinky() {ghostState = REDGHOST_HANDLE; x =level.intersections[64].x ; y = level.intersections[64].y ;};
 
 void Blinky::update()
 {};
