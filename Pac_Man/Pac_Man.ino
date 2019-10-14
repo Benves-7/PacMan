@@ -6,11 +6,13 @@
 class Player
 {
 public:
-    Player(){x = 107.0; y = 180.0; playerState = animationCounter = 0;}
+    Player(){x = 107.0; y = 180.0; playerState =PMWEST_HANDLE ; animationCounter = 0;}
     float x, y;
     int playerState, playerOpenState, animationCounter;
     int powerup = 0;
     bool idle = true;
+    int forward = 44;
+    int back = 45;
 };
 
 class Ghost
@@ -95,6 +97,7 @@ Ghost ghosts[4];
 bool dots[26*29];
 int powerDots[4] = {2*26,2*26+25,21*26,21*26+25};
 int points = 0;
+float speed = 1/16.f;
 
 void buildMap() {
     level.intersections[0] =  Intersection( 0, 4  , 4  , -1,  1,  6, -1);
@@ -339,6 +342,7 @@ void setup()
     ghosts[2] = Inky();
     ghosts[3] = Clyde();
 }
+#define swapDirection {int temp = pacMan.forward; pacMan.forward=pacMan.back;pacMan.back=temp;}
 
 void updatePlayer()
 {
@@ -346,9 +350,96 @@ void updatePlayer()
     xValue = analogRead(A13);
     yValue = analogRead(A14);
 
-    if (xValue > 650) {
-        pacMan.playerState = PMEAST_HANDLE;
+    Intersection forward = level.intersections[pacMan.forward];
+
+    if (pacMan.x==forward.x && pacMan.y==forward.y)
+    {
+      if (xValue > 650 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
+          pacMan.playerState = PMEAST_HANDLE;
+          pacMan.idle = false;
+          pacMan.back = pacMan.forward;
+          pacMan.forward = forward.east;
+        
+      }
+      else if (xValue < 350 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
+        pacMan.playerState = PMWEST_HANDLE;
         pacMan.idle = false;
+        pacMan.back = pacMan.forward;
+        pacMan.forward = forward.west;
+      }
+      else if (yValue > 650 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
+        pacMan.playerState = PMSOUTH_HANDLE;
+        pacMan.idle = false;
+        pacMan.back = pacMan.forward;
+        pacMan.forward = forward.south;
+      }
+      else if (yValue < 350 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
+        pacMan.playerState = PMNORTH_HANDLE;
+        pacMan.idle = false;
+        pacMan.back = pacMan.forward;
+        pacMan.forward = forward.north;
+      }
+      else
+      {
+        if(*forward.neighbours[pacMan.playerState] == -1)
+        {
+          pacMan.idle=true;
+          pacMan.back=pacMan.forward;
+        }
+      }
+
+    }
+    else
+    {
+      if (forward.y == level.intersections[pacMan.back].y) // y är rätt
+      {
+        if (xValue > 650) 
+        {
+          if (!(pacMan.playerState == PMEAST_HANDLE))
+          {
+            swapDirection;
+            pacMan.playerState = PMEAST_HANDLE;
+          }
+          pacMan.idle = false;
+        }
+        else if (xValue < 350) 
+        {
+          if (!(pacMan.playerState == PMWEST_HANDLE))
+          {
+            swapDirection;
+            
+            pacMan.playerState = PMWEST_HANDLE;
+          }
+          pacMan.idle = false;
+        }
+      }
+      else
+      {
+        if (yValue > 650) 
+        {
+          if(!(pacMan.playerState == PMSOUTH_HANDLE))
+          {
+            swapDirection;
+            pacMan.playerState = PMSOUTH_HANDLE;
+          }
+          pacMan.idle = false;
+        }
+        else if (yValue < 350) 
+        {
+          if(!(pacMan.playerState == PMNORTH_HANDLE))
+          {
+            swapDirection;
+            pacMan.playerState = PMNORTH_HANDLE;
+          }
+          pacMan.idle = false;
+        }
+      }
+    }
+    
+  /*
+    if (xValue > 650) {
+      pacMan.playerState = PMEAST_HANDLE;
+      pacMan.idle = false;
     }
     if (xValue < 350) {
         pacMan.playerState = PMWEST_HANDLE;
@@ -362,27 +453,28 @@ void updatePlayer()
         pacMan.playerState = PMNORTH_HANDLE;
         pacMan.idle = false;
     }
-
+    
+*/
     if (!pacMan.idle){
       if (pacMan.playerState == PMNORTH_HANDLE) // North
       {
           if (pacMan.y > 0) {
-              pacMan.y -= 0.1;
+              pacMan.y -= speed;
           }
       } else if (pacMan.playerState == PMEAST_HANDLE) // East
       {
           if (pacMan.x < MaxX - 15) {
-              pacMan.x += 0.1;
+              pacMan.x += speed;
           }
       } else if (pacMan.playerState == PMSOUTH_HANDLE) // South
       {
           if (pacMan.y < MaxY - 15) {
-              pacMan.y += 0.1;
+              pacMan.y += speed;
           }
       } else if (pacMan.playerState == PMWEST_HANDLE) // West
       {
           if (pacMan.x > 0) {
-              pacMan.x -= 0.1;
+              pacMan.x -= speed;
           }
       }
       const int dotIndex = floor((pacMan.x-4)/8) + floor((pacMan.y-4)/ 8) *26;
@@ -411,10 +503,14 @@ void updatePlayer()
         if (pacMan.playerOpenState == 0)
         {
             pacMan.playerOpenState = 1;
-        } else{
+        } 
+        else
+        {
             pacMan.playerOpenState = 0;
         }
-    } else {
+    } 
+    else 
+    {
         pacMan.animationCounter++;
     } 
 }
