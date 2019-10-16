@@ -6,11 +6,12 @@
 class Player
 {
 public:
-    Player(){x = 107.0; y = 180.0; playerState =PMWEST_HANDLE ; animationCounter = 0;}
+    Player(){x = 107.0; y = 181.0; playerState = PACMANWESTBIG_HANDLE ; animationCounter = 0;}
     float x, y;
-    int playerState, playerOpenState, animationCounter;
+    int playerState, playerOpenState, animationCounter, prevOpenState;
     int powerup = 0;
     bool idle = true;
+    int dir = 3;
     int forward = 44;
     int back = 45;
 };
@@ -18,72 +19,104 @@ public:
 class Ghost
 {
 public:
-    Ghost(){}
+    Ghost()
+    {}
+
     void draw();
-    void update(){};
+
+    virtual void Update();
+
+    void move();
+
     float x, y;
     int ghostState;
-    int dir;            // 0 = North, 1 = East, 2 = South, 3 = West, 4 = Stand.
+    int goalIntersect;
+    int dir = 0;            // 0 = North, 1 = East, 2 = South, 3 = West, 4 = Stand.
 };
 
 class Blinky: public Ghost //red
 {
-  public:
-    Blinky() {ghostState = REDGHOST_HANDLE; x =106; ; y = 86 ;};
-    void update();
+public:
+    Blinky()
+    {
+        ghostState = REDGHOSTBIG_HANDLE;
+        x = 106;;
+        y = 86;
+    };
+
+    void Update(){};
 };
 class Pinky: public Ghost //pink
 {
-  public:
-    Pinky(){ghostState = PINKGHOST_HANDLE; x = 106; y = 110; };
-    void update();
-  };
+public:
+    Pinky()
+    {
+        ghostState = PINKGHOSTBIG_HANDLE;
+        x = 106;
+        y = 110;
+    };
+
+    void Update(){};
+};
 class Inky: public Ghost //blue
 {
-  public:
-    Inky(){ghostState = BLUEGHOST_HANDLE; x = 106 - PINKGHOST_WIDTH -3, y = 110;};
-    void update();
-  };
+public:
+    Inky()
+    {
+        ghostState = BLUEGHOSTBIG_HANDLE;
+        x = 106 - PINKGHOSTBIG_WIDTH - 3, y = 110;
+    };
+
+    void Update(){};
+};
 class Clyde: public Ghost //orange
 {
-  public:
-    Clyde(){ghostState = YELLOWGHOST_HANDLE; x = 106 + PINKGHOST_WIDTH+3; y = 110;};
-    void update();
-};
-
-class Dot
-{
 public:
-    Dot(int ix, int iy, bool powerUp=false) {x = ix; y = iy; this->powerUp=powerUp;};
-    int x, y;
-    bool powerUp;
+    Clyde()
+    {
+        goalIntersect = 23;
+        ghostState = YELLOWGHOSTBIG_HANDLE;
+        x = 106 + PINKGHOSTBIG_WIDTH + 3;
+        y = 110;
+    };
+
+    void Update();
 };
 
 class Intersection
 {
 public:
-    Intersection(){};
+    Intersection()
+    {};
+
     Intersection(int iindex, int xpos, int ypos, int inorth, int ieast, int isouth, int iwest)
     {
         index = iindex;
-        x = xpos;
-        y = ypos;
+        x = xpos + 1;
+        y = ypos + 1;
         north = inorth;
         east = ieast;
         south = isouth;
         west = iwest;
+        neighbours[0] = &north;
+        neighbours[1] = &east;
+        neighbours[2] = &south;
+        neighbours[3] = &west;
     }
+
     int index;
     int x, y;
     int north, east, south, west;
-    int* neighbours[4] = {&north,&east,&south,&west};
+    int *neighbours[4];
 };
 
 class Map
 {
 public:
-    Map(){}
-    int x,y;
+    Map()
+    {}
+
+    int x, y;
     Intersection intersections[65];
 };
 
@@ -93,233 +126,239 @@ int xValue, yValue;
 int animationCounter;
 int MaxX, MaxY;
 long previusTime = 0, currentTime = 0;
-Ghost ghosts[4];
+Ghost* ghosts[4];
 bool dots[26*29];
 int powerDots[4] = {2*26,2*26+25,21*26,21*26+25};
 int points = 0;
-float speed = 1/16.f;
+float speed = 1/8.f;
+int size = 14;
 
-// Order of handels:
-// 0  >> PacMan state N.
-// 1  >> PacMan state E.
-// 2  >> PacMan state S.
-// 3  >> PacMan state W.
-// 4  >> Level One.
-// 5  >> Dot.
-// 6 >> PowerUp.
-// 6 >> RedGhost.
-// 7 >> YellowGhost.
-// 8 >> PinkGhost.
-// 9 >> BlueGhost.
-// 10 >> GhostHunt.
-
-void buildMap() {
-    level.intersections[0] =  Intersection( 0, level.x + 5  , level.y + 5  , -1,  1,  6, -1);
-    level.intersections[1] =  Intersection( 1, level.x + 45 , level.y + 5  , -1,  2,  7,  0);
-    level.intersections[2] =  Intersection( 2, level.x + 93 , level.y + 5  , -1, -1,  9,  1);
-    level.intersections[3] =  Intersection( 3, level.x + 117, level.y + 5  , -1,  4, 10, -1);
-    level.intersections[4] =  Intersection( 4, level.x + 165, level.y + 5  , -1,  5, 12,  3);
-    level.intersections[5] =  Intersection( 5, level.x + 205, level.y + 5  , -1, -1, 13, -1);
-    level.intersections[6] =  Intersection( 6, level.x + 5  , level.y + 37 ,  0,  7, 14, -1);
-    level.intersections[7] =  Intersection( 7, level.x + 45 , level.y + 37 ,  1,  8, 15,  6);
-    level.intersections[8] =  Intersection( 8, level.x + 69 , level.y + 37 , -1,  9, 16,  7);
-    level.intersections[9] =  Intersection( 9, level.x + 93 , level.y + 37 ,  2, 10, -1,  8);
-    level.intersections[10] = Intersection(10, level.x + 117, level.y + 37 ,  3, 11, -1,  9);
-    level.intersections[11] = Intersection(11, level.x + 140, level.y + 37 , -1, 12, 19, 10);
-    level.intersections[12] = Intersection(12, level.x + 165, level.y + 37 ,  4, 13, 20, 11);
-    level.intersections[13] = Intersection(13, level.x + 205, level.y + 37 ,  5, -1, 21, 12);
-    level.intersections[14] = Intersection(14, level.x + 5  , level.y + 61 ,  6, 15, -1, -1);
-    level.intersections[15] = Intersection(15, level.x + 45 , level.y + 61 ,  7, -1, 26, 14);
-    level.intersections[16] = Intersection(16, level.x + 69 , level.y + 61 ,  8, 17, -1, -1);
-    level.intersections[17] = Intersection(17, level.x + 93 , level.y + 61 , -1, -1, 23, 16);
-    level.intersections[18] = Intersection(18, level.x + 117, level.y + 61 , -1, 19, 24, -1);
-    level.intersections[19] = Intersection(19, level.x + 140, level.y + 61 , 11, -1, -1, 18);
-    level.intersections[20] = Intersection(20, level.x + 165, level.y + 61 , 12, 21, 29, -1);
-    level.intersections[21] = Intersection(21, level.x + 205, level.y + 61 , 13, -1, -1, 20);
-    level.intersections[22] = Intersection(22, level.x + 69 , level.y + 85 , -1, 23, 27, -1);
-    level.intersections[23] = Intersection(23, level.x + 93 , level.y + 85 , 17, 64, -1, 22);
-    level.intersections[24] = Intersection(24, level.x + 117, level.y + 85 , 18, 25, -1, 64);
-    level.intersections[25] = Intersection(25, level.x + 140, level.y + 85 , -1, -1, 28, 24);
-    level.intersections[26] = Intersection(26, level.x + 45 , level.y + 109, 15, 27, 33, 29);
-    level.intersections[27] = Intersection(27, level.x + 69 , level.y + 109, 22, -1, 30, 26);
-    level.intersections[28] = Intersection(28, level.x + 140, level.y + 109, 25, 29, 31, -1);
-    level.intersections[29] = Intersection(29, level.x + 165, level.y + 109, 20, 26, 38, 28);
-    level.intersections[30] = Intersection(30, level.x + 69 , level.y + 133, 27, 31, 34, -1);
-    level.intersections[31] = Intersection(31, level.x + 140, level.y + 133, 28, -1, 37, 30);
-    level.intersections[32] = Intersection(32, level.x + 5  , level.y + 157, -1, 33, 40, -1);
-    level.intersections[33] = Intersection(33, level.x + 45 , level.y + 157, 26, 34, 42, 32);
-    level.intersections[34] = Intersection(34, level.x + 69 , level.y + 157, 30, 35, -1, 33);
-    level.intersections[35] = Intersection(35, level.x + 93 , level.y + 157, -1, -1, 44, 34);
-    level.intersections[36] = Intersection(36, level.x + 117, level.y + 157, -1, 37, 45, -1);
-    level.intersections[37] = Intersection(37, level.x + 140, level.y + 157, 31, 38, -1, 36);
-    level.intersections[38] = Intersection(38, level.x + 165, level.y + 157, 29, 39, 47, 37);
-    level.intersections[39] = Intersection(39, level.x + 205, level.y + 157, -1, -1, 49, 38);
-    level.intersections[40] = Intersection(40, level.x + 5  , level.y + 181, 32, 41, -1, -1);
-    level.intersections[41] = Intersection(41, level.x + 21 , level.y + 181, -1, -1, 51, 40);
-    level.intersections[42] = Intersection(42, level.x + 45 , level.y + 181, 33, 42, 52, -1);
-    level.intersections[43] = Intersection(43, level.x + 69 , level.y + 181, -1, 44, 53, 42);
-    level.intersections[44] = Intersection(44, level.x + 93 , level.y + 181, 35, 45, -1, 43);
-    level.intersections[45] = Intersection(45, level.x + 117, level.y + 181, 36, 46, -1, 44);
-    level.intersections[46] = Intersection(46, level.x + 140, level.y + 181, -1, 47, 56, 45);
-    level.intersections[47] = Intersection(47, level.x + 165, level.y + 181, 38, -1, 57, 46);
-    level.intersections[48] = Intersection(48, level.x + 189, level.y + 181, -1, 49, 58, -1);
-    level.intersections[49] = Intersection(49, level.x + 205, level.y + 181, 39, -1, -1, 48);
-    level.intersections[50] = Intersection(50, level.x + 5  , level.y + 205, -1, 51, 60, -1);
-    level.intersections[51] = Intersection(51, level.x + 21 , level.y + 205, 41, 52, -1, 50);
-    level.intersections[52] = Intersection(52, level.x + 45 , level.y + 205, 42, -1, -1, 51);
-    level.intersections[53] = Intersection(53, level.x + 69 , level.y + 205, 43, 54, -1, -1);
-    level.intersections[54] = Intersection(54, level.x + 93 , level.y + 205, -1, -1, 61, 53);
-    level.intersections[55] = Intersection(55, level.x + 117, level.y + 205, -1, 56, 62, -1);
-    level.intersections[56] = Intersection(56, level.x + 140, level.y + 205, 46, -1, -1, 55);
-    level.intersections[57] = Intersection(57, level.x + 165, level.y + 205, 47, 58, -1, -1);
-    level.intersections[58] = Intersection(58, level.x + 189, level.y + 205, 48, 59, -1, 57);
-    level.intersections[59] = Intersection(59, level.x + 205, level.y + 205, -1, -1, 63, 58);
-    level.intersections[60] = Intersection(60, level.x + 5  , level.y + 229, 50, 61, -1, -1);
-    level.intersections[61] = Intersection(61, level.x + 93 , level.y + 229, 54, 62, -1, 60);
-    level.intersections[62] = Intersection(62, level.x + 117, level.y + 229, 55, 63, -1, 61);
-    level.intersections[63] = Intersection(63, level.x + 205, level.y + 229, 59, -1, -1, 62);
-    level.intersections[64] = Intersection(64, level.x + 105, level.y + 85 , -1, 24, -1, 23);
+void buildMap()
+{
+    level.intersections[0] = Intersection(0, 4, 4, -1, 1, 6, -1);
+    level.intersections[1] = Intersection(1, 44, 4, -1, 2, 7, 0);
+    level.intersections[2] = Intersection(2, 92, 4, -1, -1, 9, 1);
+    level.intersections[3] = Intersection(3, 116, 4, -1, 4, 10, -1);
+    level.intersections[4] = Intersection(4, 164, 4, -1, 5, 12, 3);
+    level.intersections[5] = Intersection(5, 204, 4, -1, -1, 13, -1);
+    level.intersections[6] = Intersection(6, 4, 36, 0, 7, 14, -1);
+    level.intersections[7] = Intersection(7, 44, 36, 1, 8, 15, 6);
+    level.intersections[8] = Intersection(8, 68, 36, -1, 9, 16, 7);
+    level.intersections[9] = Intersection(9, 92, 36, 2, 10, -1, 8);
+    level.intersections[10] = Intersection(10, 116, 36, 3, 11, -1, 9);
+    level.intersections[11] = Intersection(11, 139, 36, -1, 12, 19, 10);
+    level.intersections[12] = Intersection(12, 164, 36, 4, 13, 20, 11);
+    level.intersections[13] = Intersection(13, 204, 36, 5, -1, 21, 12);
+    level.intersections[14] = Intersection(14, 4, 60, 6, 15, -1, -1);
+    level.intersections[15] = Intersection(15, 44, 60, 7, -1, 26, 14);
+    level.intersections[16] = Intersection(16, 68, 60, 8, 17, -1, -1);
+    level.intersections[17] = Intersection(17, 92, 60, -1, -1, 23, 16);
+    level.intersections[18] = Intersection(18, 116, 60, -1, 19, 24, -1);
+    level.intersections[19] = Intersection(19, 139, 60, 11, -1, -1, 18);
+    level.intersections[20] = Intersection(20, 164, 60, 12, 21, 29, -1);
+    level.intersections[21] = Intersection(21, 204, 60, 13, -1, -1, 20);
+    level.intersections[22] = Intersection(22, 68, 84, -1, 23, 27, -1);
+    level.intersections[23] = Intersection(23, 92, 84, 17, 64, -1, 22);
+    level.intersections[24] = Intersection(24, 116, 84, 18, 25, -1, 64);
+    level.intersections[25] = Intersection(25, 139, 84, -1, -1, 28, 24);
+    level.intersections[26] = Intersection(26, 44, 108, 15, 27, 33, 29);
+    level.intersections[27] = Intersection(27, 68, 108, 22, -1, 30, 26);
+    level.intersections[28] = Intersection(28, 139, 108, 25, 29, 31, -1);
+    level.intersections[29] = Intersection(29, 164, 108, 20, 26, 38, 28);
+    level.intersections[30] = Intersection(30, 68, 132, 27, 31, 34, -1);
+    level.intersections[31] = Intersection(31, 139, 132, 28, -1, 37, 30);
+    level.intersections[32] = Intersection(32, 4, 156, -1, 33, 40, -1);
+    level.intersections[33] = Intersection(33, 44, 156, 26, 34, 42, 32);
+    level.intersections[34] = Intersection(34, 68, 156, 30, 35, -1, 33);
+    level.intersections[35] = Intersection(35, 92, 156, -1, -1, 44, 34);
+    level.intersections[36] = Intersection(36, 116, 156, -1, 37, 45, -1);
+    level.intersections[37] = Intersection(37, 139, 156, 31, 38, -1, 36);
+    level.intersections[38] = Intersection(38, 164, 156, 29, 39, 47, 37);
+    level.intersections[39] = Intersection(39, 204, 156, -1, -1, 49, 38);
+    level.intersections[40] = Intersection(40, 4, 180, 32, 41, -1, -1);
+    level.intersections[41] = Intersection(41, 20, 180, -1, -1, 51, 40);
+    level.intersections[42] = Intersection(42, 44, 180, 33, 42, 52, -1);
+    level.intersections[43] = Intersection(43, 68, 180, -1, 44, 53, 42);
+    level.intersections[44] = Intersection(44, 92, 180, 35, 45, -1, 43);
+    level.intersections[45] = Intersection(45, 116, 180, 36, 46, -1, 44);
+    level.intersections[46] = Intersection(46, 139, 180, -1, 47, 56, 45);
+    level.intersections[47] = Intersection(47, 164, 180, 38, -1, 57, 46);
+    level.intersections[48] = Intersection(48, 188, 180, -1, 49, 58, -1);
+    level.intersections[49] = Intersection(49, 204, 180, 39, -1, -1, 48);
+    level.intersections[50] = Intersection(50, 4, 204, -1, 51, 60, -1);
+    level.intersections[51] = Intersection(51, 20, 204, 41, 52, -1, 50);
+    level.intersections[52] = Intersection(52, 44, 204, 42, -1, -1, 51);
+    level.intersections[53] = Intersection(53, 68, 204, 43, 54, -1, -1);
+    level.intersections[54] = Intersection(54, 92, 204, -1, -1, 61, 53);
+    level.intersections[55] = Intersection(55, 116, 204, -1, 56, 62, -1);
+    level.intersections[56] = Intersection(56, 139, 204, 46, -1, -1, 55);
+    level.intersections[57] = Intersection(57, 164, 204, 47, 58, -1, -1);
+    level.intersections[58] = Intersection(58, 188, 204, 48, 59, -1, 57);
+    level.intersections[59] = Intersection(59, 204, 204, -1, -1, 63, 58);
+    level.intersections[60] = Intersection(60, 4, 228, 50, 61, -1, -1);
+    level.intersections[61] = Intersection(61, 92, 228, 54, 62, -1, 60);
+    level.intersections[62] = Intersection(62, 116, 228, 55, 63, -1, 61);
+    level.intersections[63] = Intersection(63, 204, 228, 59, -1, -1, 62);
+    level.intersections[64] = Intersection(64, 104, 84, -1, 24, -1, 23);
 }
+
 #define ggr(x,y) for(int EnVariabelSomInteKommerFinnas = 0;EnVariabelSomInteKommerFinnas<x;EnVariabelSomInteKommerFinnas++){y;} 
 #define set dots[ x++ + y * 26 ] = true;
 void makeDots()
 {
-  for(int x=0; x<26; x++)
-  {
-    for(int y=0; y<29; y++)
+    for (int x = 0; x < 26; x++)
     {
-      dots[x+26*y]=false;
+        for (int y = 0; y < 29; y++)
+        {
+            dots[x + 26 * y] = false;
+        }
     }
-  }
-  int x=0;
-  int y= 0;
 
-    ggr(12,set) 
+    int x = 0;
+    int y = 0;
+
+    ggr(12, set)
     x++;
     x++;
-    ggr(12,set) 
+    ggr(12, set)
 
     ggr(3,
-      y++;
-      dots[0 + y * 26 ] = true;
-      dots[5 + y * 26 ] = true;
-      dots[11 + y * 26 ] = true;
+        y++;
+                dots[0 + y * 26] = true;
+                dots[5 + y * 26] = true;
+                dots[11 + y * 26] = true;
     )
-    x=0;
+    x = 0;
     y++;
-    ggr(26,set) 
-
-    ggr(2,
-          y++;
-  
-      dots[0 + y * 26 ] = true;
-      dots[5 + y * 26 ] = true;
-      dots[8 + y * 26 ] = true;
-      )
-
-    y++;
-    x=0;
-    ggr(6,set);
-    ggr(2,x++);
-    ggr(4,set)
+    ggr(26, set)
 
     ggr(2,
         y++;
-        dots[5 + y * 26 ] = true;
-        dots[11 + y * 26 ] = true;
+
+                dots[0 + y * 26] = true;
+                dots[5 + y * 26] = true;
+                dots[8 + y * 26] = true;
     )
 
     y++;
-    x=5;
+    x = 0;
+    ggr(6, set);
+    ggr(2, x++);
+    ggr(4, set)
+
+    ggr(2,
+        y++;
+                dots[5 + y * 26] = true;
+                dots[11 + y * 26] = true;
+    )
+
+    y++;
+    x = 5;
     set;
-    ggr(2,x++)
-    ggr(5,set)
-    
-    ggr(2,
-      y++;
-      dots[5 + y * 26 ] = true;
-      dots[8 + y * 26 ] = true;
-      )
-
-    y++;
-    x=5;
-    ggr(4,set)
+    ggr(2, x++)
+    ggr(5, set)
 
     ggr(2,
-      y++;
-      dots[5 + y * 26 ] = true;
-      dots[8 + y * 26 ] = true;
+        y++;
+                dots[5 + y * 26] = true;
+                dots[8 + y * 26] = true;
     )
 
-    y++; x=5;
+    y++;
+    x = 5;
+    ggr(4, set)
+
+    ggr(2,
+        y++;
+                dots[5 + y * 26] = true;
+                dots[8 + y * 26] = true;
+    )
+
+    y++;
+    x = 5;
     set;
-    ggr(2,x++)
-    ggr(5,set)
+    ggr(2, x++)
+    ggr(5, set)
 
-
-   ggr(2,
-    y++;
-      dots[5 + y * 26 ] = true;
-      dots[8 + y * 26 ] = true;
-    )
- 
-   y++;x=0;
-   ggr(12,set)
-  
-   ggr(2,
-    y++;x=0;
-    dots[0 + y * 26 ] = true;
-    dots[5 + y * 26 ] = true;
-    dots[11 + y * 26 ] = true;
-    )
-
-    y++;x=0;
-    ggr(3,set)
-    ggr(2,x++)
-    ggr(7,set)
 
     ggr(2,
-      y++;
-      dots[2 + y * 26 ] = true;
-      dots[5 + y * 26 ] = true;
-      dots[8 + y * 26 ] = true;
+        y++;
+                dots[5 + y * 26] = true;
+                dots[8 + y * 26] = true;
     )
 
-    y++;x=0;
-    ggr(6,set)
-    ggr(2,x++)
-    ggr(4,set)
+    y++;
+    x = 0;
+    ggr(12, set)
 
     ggr(2,
-    y++;
-      dots[0 + y * 26 ] = true;
-      dots[11 + y * 26 ] = true;
+        y++;
+                x = 0;
+                dots[0 + y * 26] = true;
+                dots[5 + y * 26] = true;
+                dots[11 + y * 26] = true;
     )
 
-    y++;x=0;
-    ggr(24,set)
-    
-  for(int x=0; x<13; x++)
-  {
-    for(int y=0; y<29; y++)
+    y++;
+    x = 0;
+    ggr(3, set)
+    ggr(2, x++)
+    ggr(7, set)
+
+    ggr(2,
+        y++;
+                dots[2 + y * 26] = true;
+                dots[5 + y * 26] = true;
+                dots[8 + y * 26] = true;
+    )
+
+    y++;
+    x = 0;
+    ggr(6, set)
+    ggr(2, x++)
+    ggr(4, set)
+
+    ggr(2,
+        y++;
+                dots[0 + y * 26] = true;
+                dots[11 + y * 26] = true;
+    )
+
+    y++;
+    x = 0;
+    ggr(24, set)
+
+    for (int x = 0; x < 13; x++)
     {
-      dots[25-x+26*y]=dots[x+26*y];
+        for (int y = 0; y < 29; y++)
+        {
+            dots[25 - x + 26 * y] = dots[x + 26 * y];
+        }
     }
-  }
 }
 
 void drawDots()
 {
-  for(int x=0; x<26; x++)
-  {
-    for(int y=0; y<29; y++)
+    for (int x = 0; x < 26; x++)
     {
-      if(dots[x+26*y])
-      {        
-        GD.Vertex2ii(level.x+4+5+x*8, level.y+4+5+y*8, DOT_HANDLE);
-      }
+        for (int y = 0; y < 29; y++)
+        {
+            const int dotIndex = x+y*26;
+            if (dots[dotIndex])
+            {
+                GD.Vertex2ii(level.x + 5 + x * 8, level.y + 5 + y * 8, DOTBIG_HANDLE);
+            
+              if (dotIndex == powerDots[0] ||
+                  dotIndex == powerDots[1] ||
+                  dotIndex == powerDots[2] ||
+                  dotIndex == powerDots[3]
+                      )
+              {
+                  GD.Vertex2ii(level.x + 5 + x * 8, level.y + 5 + y * 8, POWERUPBIG_HANDLE);
+              }
+            }
+        }
     }
-  }
 }
 
 void setup()
@@ -347,20 +386,19 @@ void setup()
 
 
     Serial.begin(9600);
-    
+
     pacMan = Player();
     MaxX = GD.w;
     MaxY = GD.h;
-    level.x = MaxX/2 - 112;
-    level.y = MaxY/2 - 124;
+    level.x = MaxX / 2 - 112;
+    level.y = MaxY / 2 - 124;
     buildMap();
     makeDots();
-    Serial.println(MaxX);
-    Serial.println(MaxY);
-    ghosts[0] = Blinky();
-    ghosts[1] = Pinky();
-    ghosts[2] = Inky();
-    ghosts[3] = Clyde();
+
+    ghosts[0] = new Blinky();
+    ghosts[1] = new Pinky();
+    ghosts[2] = new Inky();
+    ghosts[3] = new Clyde();
 }
 #define swapDirection {int temp = pacMan.forward; pacMan.forward=pacMan.back;pacMan.back=temp;}
 
@@ -370,182 +408,223 @@ void updatePlayer()
     xValue = analogRead(A13);
     yValue = analogRead(A14);
 
+    if (yValue < 350)
+    {
+        pacMan.dir = 0;
+    }
+    if (xValue > 650)
+    {
+        pacMan.dir = 1;
+    }
+    if (yValue > 650)
+    {
+        pacMan.dir = 2;
+    }
+    if (xValue < 350)
+    {
+        pacMan.dir = 3;
+    }
+
     Intersection forward = level.intersections[pacMan.forward];
 
-    if (pacMan.x==forward.x && pacMan.y==forward.y)
+    if (pacMan.x == forward.x && pacMan.y == forward.y)
     {
-      if (xValue > 650 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
-          pacMan.playerState = PMEAST_HANDLE;
-          pacMan.idle = false;
-          pacMan.back = pacMan.forward;
-          pacMan.forward = forward.east;
-        
-      }
-      else if (xValue < 350 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
-        pacMan.playerState = PMWEST_HANDLE;
-        pacMan.idle = false;
-        pacMan.back = pacMan.forward;
-        pacMan.forward = forward.west;
-      }
-      else if (yValue > 650 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
-        pacMan.playerState = PMSOUTH_HANDLE;
-        pacMan.idle = false;
-        pacMan.back = pacMan.forward;
-        pacMan.forward = forward.south;
-      }
-      else if (yValue < 350 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
-        pacMan.playerState = PMNORTH_HANDLE;
-        pacMan.idle = false;
-        pacMan.back = pacMan.forward;
-        pacMan.forward = forward.north;
-      }
-      else
-      {
-        if(*forward.neighbours[pacMan.playerState] == -1)
+        if (pacMan.dir == 0 && forward.north != -1)
         {
-          pacMan.idle=true;
-          pacMan.back=pacMan.forward;
+            pacMan.playerState = PACMANNORTHBIG_HANDLE;
+            pacMan.back = pacMan.forward;
+            pacMan.forward = forward.north;
+            pacMan.idle = false;
         }
-      }
-
+        else if (pacMan.dir == 1 && forward.east != -1)
+        {
+            pacMan.playerState = PACMANEASTBIG_HANDLE;
+            pacMan.back = pacMan.forward;
+            pacMan.forward = forward.east;
+            pacMan.idle = false;
+        }
+        else if (pacMan.dir == 2 && forward.south != -1)
+        {
+            pacMan.playerState = PACMANSOUTHBIG_HANDLE;
+            pacMan.back = pacMan.forward;
+            pacMan.forward = forward.south;
+            pacMan.idle = false;
+        }
+        else if (pacMan.dir == 3 && forward.west != -1)
+        {
+            pacMan.playerState = PACMANWESTBIG_HANDLE;
+            pacMan.back = pacMan.forward;
+            pacMan.forward = forward.west;
+            pacMan.idle = false;
+        }
+        else
+        {
+            if (pacMan.playerState == 0 && forward.north == -1)
+            {
+                pacMan.idle = true;
+                pacMan.back = pacMan.forward;
+            }
+            if (pacMan.playerState == 1 && forward.east == -1)
+            {
+                pacMan.idle = true;
+                pacMan.back = pacMan.forward;
+            }
+            if (pacMan.playerState == 2 && forward.south == -1)
+            {
+                pacMan.idle = true;
+                pacMan.back = pacMan.forward;
+            }
+            if (pacMan.playerState == 3 && forward.west == -1)
+            {
+                pacMan.idle = true;
+                pacMan.back = pacMan.forward;
+            }
+            if (*forward.neighbours[pacMan.playerState] == -1)
+            {
+                pacMan.idle = true;
+                pacMan.back = pacMan.forward;
+            }
+        }
     }
     else
     {
-      if (forward.y == level.intersections[pacMan.back].y) // y är rätt
-      {
-        if (xValue > 650) 
+        if (forward.y == level.intersections[pacMan.back].y) // y är rätt
         {
-          if (!(pacMan.playerState == PMEAST_HANDLE))
-          {
-            swapDirection;
-            pacMan.playerState = PMEAST_HANDLE;
-          }
-          pacMan.idle = false;
-        }
-        else if (xValue < 350) 
-        {
-          if (!(pacMan.playerState == PMWEST_HANDLE))
-          {
-            swapDirection;
-            
-            pacMan.playerState = PMWEST_HANDLE;
-          }
-          pacMan.idle = false;
-        }
-      }
-      else
-      {
-        if (yValue > 650) 
-        {
-          if(!(pacMan.playerState == PMSOUTH_HANDLE))
-          {
-            swapDirection;
-            pacMan.playerState = PMSOUTH_HANDLE;
-          }
-          pacMan.idle = false;
-        }
-        else if (yValue < 350) 
-        {
-          if(!(pacMan.playerState == PMNORTH_HANDLE))
-          {
-            swapDirection;
-            pacMan.playerState = PMNORTH_HANDLE;
-          }
-          pacMan.idle = false;
-        }
-      }
-    }
-    
-  /*
-    if (xValue > 650) {
-      pacMan.playerState = PMEAST_HANDLE;
-      pacMan.idle = false;
-    }
-    if (xValue < 350) {
-        pacMan.playerState = PMWEST_HANDLE;
-        pacMan.idle = false;
-    }
-    if (yValue > 650) {
-        pacMan.playerState = PMSOUTH_HANDLE;
-        pacMan.idle = false;
-    }
-    if (yValue < 350) {
-        pacMan.playerState = PMNORTH_HANDLE;
-        pacMan.idle = false;
-    }
-    
-*/
-    if (!pacMan.idle){
-      if (pacMan.playerState == PMNORTH_HANDLE) // North
-      {
-          if (pacMan.y > 0) {
-              pacMan.y -= speed;
-          }
-      } else if (pacMan.playerState == PMEAST_HANDLE) // East
-      {
-          if (pacMan.x < MaxX - 15) {
-              pacMan.x += speed;
-          }
-      } else if (pacMan.playerState == PMSOUTH_HANDLE) // South
-      {
-          if (pacMan.y < MaxY - 15) {
-              pacMan.y += speed;
-          }
-      } else if (pacMan.playerState == PMWEST_HANDLE) // West
-      {
-          if (pacMan.x > 0) {
-              pacMan.x -= speed;
-          }
-      }
-      const int dotIndex = floor((pacMan.x-4)/8) + floor((pacMan.y-4)/ 8) *26;
-      if(dots[dotIndex])
-        {
-          dots[dotIndex] = false;
-          points+=50;
-          if(dotIndex == powerDots[0] ||
-            dotIndex == powerDots[1] ||
-            dotIndex == powerDots[2] ||
-            dotIndex == powerDots[3]
-            )
+            if (xValue > 650)
             {
-              points+=150;
-              pacMan.powerup=1000;
+                if (!(pacMan.playerState == PACMANEASTBIG_HANDLE))
+                {
+                    swapDirection;
+                    pacMan.playerState = PACMANEASTBIG_HANDLE;
+                }
+                pacMan.idle = false;
+            }
+            else if (xValue < 350)
+            {
+                if (!(pacMan.playerState == PACMANWESTBIG_HANDLE))
+                {
+                    swapDirection;
+
+                    pacMan.playerState = PACMANWESTBIG_HANDLE;
+                }
+                pacMan.idle = false;
+            }
+        }
+        else
+        {
+            if (yValue > 650)
+            {
+                if (!(pacMan.playerState == PACMANSOUTHBIG_HANDLE))
+                {
+                    swapDirection;
+                    pacMan.playerState = PACMANSOUTHBIG_HANDLE;
+                }
+                pacMan.idle = false;
+            }
+            else if (yValue < 350)
+            {
+                if (!(pacMan.playerState == PACMANNORTHBIG_HANDLE))
+                {
+                    swapDirection;
+                    pacMan.playerState = PACMANNORTHBIG_HANDLE;
+                }
+                pacMan.idle = false;
             }
         }
     }
 
-    if( pacMan.powerup > 0)
-      pacMan.powerup--;
+    if (!pacMan.idle)
+    {
+        if (pacMan.playerState == PACMANNORTHBIG_HANDLE) // North
+        {
+            if (pacMan.y > 5)
+            {
+                pacMan.y -= speed;
+            }
+        }
+        else if (pacMan.playerState == PACMANEASTBIG_HANDLE) // East
+        {
+            if (pacMan.x < MaxX - 14)
+            {
+                pacMan.x += speed;
+            }
+        }
+        else if (pacMan.playerState == PACMANSOUTHBIG_HANDLE) // South
+        {
+            if (pacMan.y < MaxY - 14)
+            {
+                pacMan.y += speed;
+            }
+        }
+        else if (pacMan.playerState == PACMANWESTBIG_HANDLE) // West
+        {
+            if (pacMan.x > 5)
+            {
+                pacMan.x -= speed;
+            }
+        }
+        const int dotIndex = floor((pacMan.x - 4) / 8) + floor((pacMan.y - 4) / 8) * 26;
+        if (dots[dotIndex])
+        {
+            dots[dotIndex] = false;
+            points += 50;
+            if (dotIndex == powerDots[0] ||
+                dotIndex == powerDots[1] ||
+                dotIndex == powerDots[2] ||
+                dotIndex == powerDots[3]
+                    )
+            {
+                points += 150;
+                pacMan.powerup = 1000;
+            }
+        }
+    }
 
-    if (!pacMan.idle && pacMan.animationCounter > 90)
+    if (pacMan.powerup > 0)
+        pacMan.powerup--;
+
+    if (!pacMan.idle && pacMan.animationCounter > 5)
     {
         pacMan.animationCounter = 0;
         if (pacMan.playerOpenState == 0)
         {
+            pacMan.prevOpenState = pacMan.playerOpenState;
             pacMan.playerOpenState = 1;
-        } 
+        }
+        else if(pacMan.playerOpenState == 1)
+        {
+            if(pacMan.prevOpenState == 0)
+            {
+                pacMan.playerOpenState = 2;
+            }
+            else
+            {
+                pacMan.playerOpenState = 0;
+            }
+        }
         else
         {
-            pacMan.playerOpenState = 0;
+            pacMan.prevOpenState = pacMan.playerOpenState;
+            pacMan.playerOpenState = 1;
         }
-    } 
-    else 
+    }
+    else
     {
         pacMan.animationCounter++;
-    } 
+    }
 }
 void updateGhosts()
 {
   for(int i=0;i<4;i++)
   {
-    ghosts[i].update();
+    ghosts[i]->Update();
   }
 }
 void drawGhosts()
 {
   for(int i=0;i<4;i++)
   {
-    ghosts[i].draw();
+    ghosts[i]->draw();
   }
 }
 
@@ -581,13 +660,68 @@ void loop()
 }
 
 void Ghost::draw()
+{
+    if (pacMan.powerup > 0)
+        GD.Vertex2ii(level.x + this->x, level.y + this->y, GHOSTHUNTBIG_HANDLE);
+    else
+        GD.Vertex2ii(level.x + this->x, level.y + this->y, this->ghostState, this->dir);
+};
+void Ghost::move()
+{
+    Intersection forward = level.intersections[goalIntersect];
+    if (forward.y < y)
     {
-       if (pacMan.powerup > 0)
-        GD.Vertex2ii(level.x+this->x,level.y+this->y,GHOSTHUNT_HANDLE);
-       else
-        GD.Vertex2ii(level.x+this->x,level.y+this->y,this->ghostState);
-    };
+        y -= speed;
+    }
+    else if(forward.y > y)
+    {
+        y += speed;
+    }
+    if(forward.x < x)
+    {
+        x -= speed;
+    }
+    else if(forward.x > x)
+    {
+        x += speed;
+    }
+}
 
-
-void Blinky::update()
-{};
+void Clyde::Update()
+{
+    Intersection forward = level.intersections[this->goalIntersect];
+    
+    if (x == forward.x && y == forward.y)
+    {
+        do
+        {
+            dir = rand() % 4;
+            if (dir == 0 && forward.north != -1)
+            {
+                goalIntersect = forward.north;
+                break;
+            }
+            else if (dir == 1 && forward.east != -1)
+            {
+                goalIntersect = forward.east;
+                break;
+            }
+            else if (dir == 2 && forward.south != -1)
+            {
+                goalIntersect = forward.south;
+                break;
+            }
+            else if (dir == 3 && forward.west != -1)
+            {
+                goalIntersect = forward.west;
+                break;
+            }
+        }
+        while(true);
+        Serial.println(goalIntersect);
+    }
+    else
+    {
+        move();
+    }
+}
