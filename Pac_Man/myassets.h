@@ -1,92 +1,92 @@
 // This file was generated with the command-line:
-//    /usr/local/bin/gd2asset -f myassets.gd2 -o myassets.h PMNorth.jpg PMEast.jpg PMSouth.jpg PMWest.jpg levelOne.jpg Dot.jpg PowerUp.jpg RedGhost.jpg YellowGhost.jpg BlueGhost.jpg PinkGhost.jpg GhostHunt.jpg
+//    /usr/local/bin/gd2asset -f myassets.gd2 -o myassets.h PacManNorthBig.png PacManEastBig.png PacManSouthBig.png PacManWestBig.png levelOne.jpg DotBig.png PowerUpBig.png RedGhostBig.png YellowGhostBig.png BlueGhostBig.png PinkGhostBig.png GhostHuntBig.png
 
-#define PMNORTH_HANDLE 0
-#define PMNORTH_WIDTH 12
-#define PMNORTH_HEIGHT 24
-#define PMNORTH_CELLS 1
-#define PMEAST_HANDLE 1
-#define PMEAST_WIDTH 12
-#define PMEAST_HEIGHT 24
-#define PMEAST_CELLS 1
-#define PMSOUTH_HANDLE 2
-#define PMSOUTH_WIDTH 12
-#define PMSOUTH_HEIGHT 24
-#define PMSOUTH_CELLS 1
-#define PMWEST_HANDLE 3
-#define PMWEST_WIDTH 12
-#define PMWEST_HEIGHT 24
-#define PMWEST_CELLS 1
+#define PACMANNORTHBIG_HANDLE 0
+#define PACMANNORTHBIG_WIDTH 14
+#define PACMANNORTHBIG_HEIGHT 42
+#define PACMANNORTHBIG_CELLS 1
+#define PACMANEASTBIG_HANDLE 1
+#define PACMANEASTBIG_WIDTH 14
+#define PACMANEASTBIG_HEIGHT 42
+#define PACMANEASTBIG_CELLS 1
+#define PACMANSOUTHBIG_HANDLE 2
+#define PACMANSOUTHBIG_WIDTH 14
+#define PACMANSOUTHBIG_HEIGHT 42
+#define PACMANSOUTHBIG_CELLS 1
+#define PACMANWESTBIG_HANDLE 3
+#define PACMANWESTBIG_WIDTH 14
+#define PACMANWESTBIG_HEIGHT 42
+#define PACMANWESTBIG_CELLS 1
 #define LEVELONE_HANDLE 4
 #define LEVELONE_WIDTH 224
 #define LEVELONE_HEIGHT 248
 #define LEVELONE_CELLS 1
-#define DOT_HANDLE 5
-#define DOT_WIDTH 8
-#define DOT_HEIGHT 7
-#define DOT_CELLS 1
-#define POWERUP_HANDLE 6
-#define POWERUP_WIDTH 8
-#define POWERUP_HEIGHT 9
-#define POWERUP_CELLS 1
-#define REDGHOST_HANDLE 7
-#define REDGHOST_WIDTH 12
-#define REDGHOST_HEIGHT 12
-#define REDGHOST_CELLS 1
-#define YELLOWGHOST_HANDLE 8
-#define YELLOWGHOST_WIDTH 12
-#define YELLOWGHOST_HEIGHT 12
-#define YELLOWGHOST_CELLS 1
-#define BLUEGHOST_HANDLE 9
-#define BLUEGHOST_WIDTH 12
-#define BLUEGHOST_HEIGHT 12
-#define BLUEGHOST_CELLS 1
-#define PINKGHOST_HANDLE 10
-#define PINKGHOST_WIDTH 12
-#define PINKGHOST_HEIGHT 12
-#define PINKGHOST_CELLS 1
-#define GHOSTHUNT_HANDLE 11
-#define GHOSTHUNT_WIDTH 12
-#define GHOSTHUNT_HEIGHT 12
-#define GHOSTHUNT_CELLS 1
-#define ASSETS_END 115104UL
+#define DOTBIG_HANDLE 5
+#define DOTBIG_WIDTH 14
+#define DOTBIG_HEIGHT 14
+#define DOTBIG_CELLS 1
+#define POWERUPBIG_HANDLE 6
+#define POWERUPBIG_WIDTH 14
+#define POWERUPBIG_HEIGHT 14
+#define POWERUPBIG_CELLS 1
+#define REDGHOSTBIG_HANDLE 7
+#define REDGHOSTBIG_WIDTH 14
+#define REDGHOSTBIG_HEIGHT 56
+#define REDGHOSTBIG_CELLS 1
+#define YELLOWGHOSTBIG_HANDLE 8
+#define YELLOWGHOSTBIG_WIDTH 14
+#define YELLOWGHOSTBIG_HEIGHT 56
+#define YELLOWGHOSTBIG_CELLS 1
+#define BLUEGHOSTBIG_HANDLE 9
+#define BLUEGHOSTBIG_WIDTH 14
+#define BLUEGHOSTBIG_HEIGHT 56
+#define BLUEGHOSTBIG_CELLS 1
+#define PINKGHOSTBIG_HANDLE 10
+#define PINKGHOSTBIG_WIDTH 14
+#define PINKGHOSTBIG_HEIGHT 56
+#define PINKGHOSTBIG_CELLS 1
+#define GHOSTHUNTBIG_HANDLE 11
+#define GHOSTHUNTBIG_WIDTH 14
+#define GHOSTHUNTBIG_HEIGHT 14
+#define GHOSTHUNTBIG_CELLS 1
+#define ASSETS_END 123256UL
 #define LOAD_ASSETS()  (GD.safeload("myassets.gd2"), GD.loadptr = ASSETS_END)
-static const shape_t PMNORTH_SHAPE = {0, 12, 24, 0};
-static const shape_t PMEAST_SHAPE = {1, 12, 24, 0};
-static const shape_t PMSOUTH_SHAPE = {2, 12, 24, 0};
-static const shape_t PMWEST_SHAPE = {3, 12, 24, 0};
+static const shape_t PACMANNORTHBIG_SHAPE = {0, 14, 42, 0};
+static const shape_t PACMANEASTBIG_SHAPE = {1, 14, 42, 0};
+static const shape_t PACMANSOUTHBIG_SHAPE = {2, 14, 42, 0};
+static const shape_t PACMANWESTBIG_SHAPE = {3, 14, 42, 0};
 static const shape_t LEVELONE_SHAPE = {4, 224, 248, 0};
-static const shape_t DOT_SHAPE = {5, 8, 7, 0};
-static const shape_t POWERUP_SHAPE = {6, 8, 9, 0};
-static const shape_t REDGHOST_SHAPE = {7, 12, 12, 0};
-static const shape_t YELLOWGHOST_SHAPE = {8, 12, 12, 0};
-static const shape_t BLUEGHOST_SHAPE = {9, 12, 12, 0};
-static const shape_t PINKGHOST_SHAPE = {10, 12, 12, 0};
-static const shape_t GHOSTHUNT_SHAPE = {11, 12, 12, 0};
+static const shape_t DOTBIG_SHAPE = {5, 14, 14, 0};
+static const shape_t POWERUPBIG_SHAPE = {6, 14, 14, 0};
+static const shape_t REDGHOSTBIG_SHAPE = {7, 14, 56, 0};
+static const shape_t YELLOWGHOSTBIG_SHAPE = {8, 14, 56, 0};
+static const shape_t BLUEGHOSTBIG_SHAPE = {9, 14, 56, 0};
+static const shape_t PINKGHOSTBIG_SHAPE = {10, 14, 56, 0};
+static const shape_t GHOSTHUNTBIG_SHAPE = {11, 14, 14, 0};
 struct {
-  Bitmap pmnorth;
-  Bitmap pmeast;
-  Bitmap pmsouth;
-  Bitmap pmwest;
+  Bitmap pacmannorthbig;
+  Bitmap pacmaneastbig;
+  Bitmap pacmansouthbig;
+  Bitmap pacmanwestbig;
   Bitmap levelone;
-  Bitmap dot;
-  Bitmap powerup;
-  Bitmap redghost;
-  Bitmap yellowghost;
-  Bitmap blueghost;
-  Bitmap pinkghost;
-  Bitmap ghosthunt;
+  Bitmap dotbig;
+  Bitmap powerupbig;
+  Bitmap redghostbig;
+  Bitmap yellowghostbig;
+  Bitmap blueghostbig;
+  Bitmap pinkghostbig;
+  Bitmap ghosthuntbig;
 } bitmaps = {
- /*          pmnorth */  {{ 12,  24}, {  6,  12},      0x0UL,  6,  0},
- /*           pmeast */  {{ 12,  24}, {  6,  12},    0x240UL,  6,  1},
- /*          pmsouth */  {{ 12,  24}, {  6,  12},    0x480UL,  6,  2},
- /*           pmwest */  {{ 12,  24}, {  6,  12},    0x6c0UL,  6,  3},
- /*         levelone */  {{224, 248}, {112, 124},    0x900UL,  6,  4},
- /*              dot */  {{  8,   7}, {  4,   3},  0x1bb00UL,  6,  5},
- /*          powerup */  {{  8,   9}, {  4,   4},  0x1bb70UL,  6,  6},
- /*         redghost */  {{ 12,  12}, {  6,   6},  0x1bc00UL,  6,  7},
- /*      yellowghost */  {{ 12,  12}, {  6,   6},  0x1bd20UL,  6,  8},
- /*        blueghost */  {{ 12,  12}, {  6,   6},  0x1be40UL,  6,  9},
- /*        pinkghost */  {{ 12,  12}, {  6,   6},  0x1bf60UL,  6, 10},
- /*        ghosthunt */  {{ 12,  12}, {  6,   6},  0x1c080UL,  6, 11}
+ /*   pacmannorthbig */  {{ 14,  42}, {  7,  21},      0x0UL,  6,  0},
+ /*    pacmaneastbig */  {{ 14,  42}, {  7,  21},    0x498UL,  6,  1},
+ /*   pacmansouthbig */  {{ 14,  42}, {  7,  21},    0x930UL,  6,  2},
+ /*    pacmanwestbig */  {{ 14,  42}, {  7,  21},    0xdc8UL,  6,  3},
+ /*         levelone */  {{224, 248}, {112, 124},   0x1260UL,  6,  4},
+ /*           dotbig */  {{ 14,  14}, {  7,   7},  0x1c460UL,  6,  5},
+ /*       powerupbig */  {{ 14,  14}, {  7,   7},  0x1c5e8UL,  6,  6},
+ /*      redghostbig */  {{ 14,  56}, {  7,  28},  0x1c770UL,  6,  7},
+ /*   yellowghostbig */  {{ 14,  56}, {  7,  28},  0x1cd90UL,  6,  8},
+ /*     blueghostbig */  {{ 14,  56}, {  7,  28},  0x1d3b0UL,  6,  9},
+ /*     pinkghostbig */  {{ 14,  56}, {  7,  28},  0x1d9d0UL,  6, 10},
+ /*     ghosthuntbig */  {{ 14,  14}, {  7,   7},  0x1dff0UL,  6, 11}
 };
