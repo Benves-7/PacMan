@@ -6,11 +6,13 @@
 class Player
 {
 public:
-    Player(){x = 0.0; y = 0.0; playerState = animationCounter = 0;}
+    Player(){x = 107.0; y = 180.0; playerState =PMWEST_HANDLE ; animationCounter = 0;}
     float x, y;
-    int playerState, playerOpenState, animationCounter, prevOpenState, dir;
-    int 
+    int playerState, playerOpenState, animationCounter;
     int powerup = 0;
+    bool idle = true;
+    int forward = 44;
+    int back = 45;
 };
 
 class Ghost
@@ -27,25 +29,25 @@ public:
 class Blinky: public Ghost //red
 {
   public:
-    Blinky();
+    Blinky() {ghostState = REDGHOST_HANDLE; x =106; ; y = 86 ;};
     void update();
 };
 class Pinky: public Ghost //pink
 {
   public:
-    Pinky(){ghostState = PINKGHOSTBIG_HANDLE; x = GD.w/2-PINKGHOSTBIG_WIDTH/2; y = 120; };
+    Pinky(){ghostState = PINKGHOST_HANDLE; x = 106; y = 110; };
     void update();
   };
 class Inky: public Ghost //blue
 {
   public:
-    Inky(){ghostState = BLUEGHOSTBIG_HANDLE; x = GD.w/2-BLUEGHOSTBIG_WIDTH/2 - PINKGHOSTBIG_WIDTH -3, y = 120;};
+    Inky(){ghostState = BLUEGHOST_HANDLE; x = 106 - PINKGHOST_WIDTH -3, y = 110;};
     void update();
   };
 class Clyde: public Ghost //orange
 {
   public:
-    Clyde(){ghostState = YELLOWGHOSTBIG_HANDLE; x = GD.w/2-YELLOWGHOSTBIG_WIDTH/2 + PINKGHOSTBIG_WIDTH+3; y = 120;};
+    Clyde(){ghostState = YELLOWGHOST_HANDLE; x = 106 + PINKGHOST_WIDTH+3; y = 110;};
     void update();
 };
 
@@ -86,8 +88,6 @@ public:
 };
 
 Player pacMan;
-int size = 14;
-float speed = 0.1;
 Map level;
 int xValue, yValue;
 int animationCounter;
@@ -95,6 +95,9 @@ int MaxX, MaxY;
 long previusTime = 0, currentTime = 0;
 Ghost ghosts[4];
 bool dots[26*29];
+int powerDots[4] = {2*26,2*26+25,21*26,21*26+25};
+int points = 0;
+float speed = 1/16.f;
 
 // Order of handels:
 // 0  >> PacMan state N.
@@ -181,7 +184,7 @@ void buildMap() {
 #define set dots[ x++ + y * 26 ] = true;
 void makeDots()
 {
-for(int x=0; x<26; x++)
+  for(int x=0; x<26; x++)
   {
     for(int y=0; y<29; y++)
     {
@@ -225,8 +228,6 @@ for(int x=0; x<26; x++)
         dots[5 + y * 26 ] = true;
         dots[11 + y * 26 ] = true;
     )
-    
-
 
     y++;
     x=5;
@@ -275,7 +276,7 @@ for(int x=0; x<26; x++)
     y++;x=0;
     ggr(3,set)
     ggr(2,x++)
-    ggr(10,set)
+    ggr(7,set)
 
     ggr(2,
       y++;
@@ -298,70 +299,13 @@ for(int x=0; x<26; x++)
     y++;x=0;
     ggr(24,set)
     
-for(int x=0; x<13; x++)
+  for(int x=0; x<13; x++)
   {
     for(int y=0; y<29; y++)
     {
       dots[25-x+26*y]=dots[x+26*y];
     }
   }
-/*
-  
-  int current = 0;
-  
-  while(current < 64)
-  {
-    Intersection* currentIntr = &level.intersections[current];
-    
-      int x8= (currentIntr->x-level.x-4)/8;
-      int y8 = (currentIntr->y-level.y-4)/8;
-
-    
-    for(int i=0;i<4;i++)
-    {
-     int index = *(currentIntr->neighbours[i]);
-     Serial.println("__________________");
-      delay(20);
-      Serial.println(index);
-    delay(20);
-     if(index == -1)
-      continue;
-     Intersection* neighbour = &level.intersections[index];
-     
-      if(neighbour->index < current)
-        continue;
-      
-      int xdif = abs(x8 - (neighbour->x-level.x-4)/8); 
-      int ydif = abs(y8 - (neighbour->y-level.y-4)/8);  
-      
-
-delay(20);
-Serial.println(y8);
-delay(20);
-Serial.println((neighbour->y-level.y-4)/8);
-delay(20)    ;  
-      int x=0;
-      do
-      {
-        int y=0;
-        do
-        {
-          //Serial.println(x8+x+(26*(y8+y)));
-          dots[x8+x+(26*(y8+y))] = true;
-     
-          y+=1;
-        }
-        while(y<ydif);
-        x+=1;
-      }
-      while(x<xdif);
-      //Serial.println("__________________");
-  
-    }
-
-    current++;
-  }
-  */
 }
 
 void drawDots()
@@ -371,10 +315,8 @@ void drawDots()
     for(int y=0; y<29; y++)
     {
       if(dots[x+26*y])
-      {
-        
-        GD.Vertex2ii(level.x+4+5+x*8, level.y+4+5+y*8, DOTBIG_HANDLE);
-        //GD.Vertex2ii(100,100, DOT_HANDLE);
+      {        
+        GD.Vertex2ii(level.x+4+5+x*8, level.y+4+5+y*8, DOT_HANDLE);
       }
     }
   }
@@ -405,7 +347,8 @@ void setup()
 
 
     Serial.begin(9600);
-
+    
+    pacMan = Player();
     MaxX = GD.w;
     MaxY = GD.h;
     level.x = MaxX/2 - 112;
@@ -414,12 +357,12 @@ void setup()
     makeDots();
     Serial.println(MaxX);
     Serial.println(MaxY);
-    pacMan.x = level.intersections[26].x; pacMan.y = level.intersections[26].y;
     ghosts[0] = Blinky();
     ghosts[1] = Pinky();
     ghosts[2] = Inky();
     ghosts[3] = Clyde();
 }
+#define swapDirection {int temp = pacMan.forward; pacMan.forward=pacMan.back;pacMan.back=temp;}
 
 void updatePlayer()
 {
@@ -427,71 +370,167 @@ void updatePlayer()
     xValue = analogRead(A13);
     yValue = analogRead(A14);
 
+    Intersection forward = level.intersections[pacMan.forward];
+
+    if (pacMan.x==forward.x && pacMan.y==forward.y)
+    {
+      if (xValue > 650 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
+          pacMan.playerState = PMEAST_HANDLE;
+          pacMan.idle = false;
+          pacMan.back = pacMan.forward;
+          pacMan.forward = forward.east;
+        
+      }
+      else if (xValue < 350 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
+        pacMan.playerState = PMWEST_HANDLE;
+        pacMan.idle = false;
+        pacMan.back = pacMan.forward;
+        pacMan.forward = forward.west;
+      }
+      else if (yValue > 650 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
+        pacMan.playerState = PMSOUTH_HANDLE;
+        pacMan.idle = false;
+        pacMan.back = pacMan.forward;
+        pacMan.forward = forward.south;
+      }
+      else if (yValue < 350 && !(*forward.neighbours[PMEAST_HANDLE] == -1)) {
+        pacMan.playerState = PMNORTH_HANDLE;
+        pacMan.idle = false;
+        pacMan.back = pacMan.forward;
+        pacMan.forward = forward.north;
+      }
+      else
+      {
+        if(*forward.neighbours[pacMan.playerState] == -1)
+        {
+          pacMan.idle=true;
+          pacMan.back=pacMan.forward;
+        }
+      }
+
+    }
+    else
+    {
+      if (forward.y == level.intersections[pacMan.back].y) // y är rätt
+      {
+        if (xValue > 650) 
+        {
+          if (!(pacMan.playerState == PMEAST_HANDLE))
+          {
+            swapDirection;
+            pacMan.playerState = PMEAST_HANDLE;
+          }
+          pacMan.idle = false;
+        }
+        else if (xValue < 350) 
+        {
+          if (!(pacMan.playerState == PMWEST_HANDLE))
+          {
+            swapDirection;
+            
+            pacMan.playerState = PMWEST_HANDLE;
+          }
+          pacMan.idle = false;
+        }
+      }
+      else
+      {
+        if (yValue > 650) 
+        {
+          if(!(pacMan.playerState == PMSOUTH_HANDLE))
+          {
+            swapDirection;
+            pacMan.playerState = PMSOUTH_HANDLE;
+          }
+          pacMan.idle = false;
+        }
+        else if (yValue < 350) 
+        {
+          if(!(pacMan.playerState == PMNORTH_HANDLE))
+          {
+            swapDirection;
+            pacMan.playerState = PMNORTH_HANDLE;
+          }
+          pacMan.idle = false;
+        }
+      }
+    }
+    
+  /*
     if (xValue > 650) {
-        dir = 0;
-        pacMan.playerState = PACMANEASTBIG_HANDLE;
+      pacMan.playerState = PMEAST_HANDLE;
+      pacMan.idle = false;
     }
     if (xValue < 350) {
-        dir = 1;
-        pacMan.playerState = PACMANWESTBIG_HANDLE;
+        pacMan.playerState = PMWEST_HANDLE;
+        pacMan.idle = false;
     }
     if (yValue > 650) {
-        dir = 2;
-        pacMan.playerState = PACMANSOUTHBIG_HANDLE;
+        pacMan.playerState = PMSOUTH_HANDLE;
+        pacMan.idle = false;
     }
     if (yValue < 350) {
-        dir = 3;
-        pacMan.playerState = PACMANNORTHBIG_HANDLE;
+        pacMan.playerState = PMNORTH_HANDLE;
+        pacMan.idle = false;
     }
-
-
-
-
-
-
-    if (pacMan.playerState == PACMANNORTHBIG_HANDLE) // North
-    {
-        if (pacMan.y > 0) {
-            pacMan.y -= speed;
-        }
-    } else if (pacMan.playerState == PACMANEASTBIG_HANDLE) // East
-    {
-        if (pacMan.x < MaxX - size) {
-            pacMan.x += speed;
-        }
-    } else if (pacMan.playerState == PACMANSOUTHBIG_HANDLE) // South
-    {
-        if (pacMan.y < MaxY - size) {
-            pacMan.y += speed;
-        }
-    } else if (pacMan.playerState == PACMANWESTBIG_HANDLE) // West
-    {
-        if (pacMan.x > 0) {
-            pacMan.x -= speed;
+    
+*/
+    if (!pacMan.idle){
+      if (pacMan.playerState == PMNORTH_HANDLE) // North
+      {
+          if (pacMan.y > 0) {
+              pacMan.y -= speed;
+          }
+      } else if (pacMan.playerState == PMEAST_HANDLE) // East
+      {
+          if (pacMan.x < MaxX - 15) {
+              pacMan.x += speed;
+          }
+      } else if (pacMan.playerState == PMSOUTH_HANDLE) // South
+      {
+          if (pacMan.y < MaxY - 15) {
+              pacMan.y += speed;
+          }
+      } else if (pacMan.playerState == PMWEST_HANDLE) // West
+      {
+          if (pacMan.x > 0) {
+              pacMan.x -= speed;
+          }
+      }
+      const int dotIndex = floor((pacMan.x-4)/8) + floor((pacMan.y-4)/ 8) *26;
+      if(dots[dotIndex])
+        {
+          dots[dotIndex] = false;
+          points+=50;
+          if(dotIndex == powerDots[0] ||
+            dotIndex == powerDots[1] ||
+            dotIndex == powerDots[2] ||
+            dotIndex == powerDots[3]
+            )
+            {
+              points+=150;
+              pacMan.powerup=1000;
+            }
         }
     }
 
     if( pacMan.powerup > 0)
       pacMan.powerup--;
 
-    if (pacMan.animationCounter > 5)
+    if (!pacMan.idle && pacMan.animationCounter > 90)
     {
         pacMan.animationCounter = 0;
         if (pacMan.playerOpenState == 0)
         {
-            pacMan.prevOpenState = pacMan.playerOpenState;
             pacMan.playerOpenState = 1;
-        } else if(pacMan.playerOpenState == 1) {
-            if (pacMan.prevOpenState == 0) {
-                pacMan.playerOpenState = 2;
-            } else {
-                pacMan.playerOpenState = 0;
-            }
-        } else {
-            pacMan.prevOpenState = pacMan.playerOpenState;
-            pacMan.playerOpenState = 1;
+        } 
+        else
+        {
+            pacMan.playerOpenState = 0;
         }
-    } else {
+    } 
+    else 
+    {
         pacMan.animationCounter++;
     } 
 }
@@ -515,9 +554,10 @@ void draw()
     GD.Clear();
     GD.Begin(BITMAPS);
     GD.Vertex2ii(level.x, level.y, 4);    //draw map in center of screen.
-    GD.Vertex2ii(pacMan.x, pacMan.y, pacMan.playerState, pacMan.playerOpenState); // draw pacMan
+    GD.Vertex2ii(level.x+pacMan.x, level.y+pacMan.y, pacMan.playerState, pacMan.playerOpenState); // draw pacMan
     drawDots();
     drawGhosts();
+    GD.cmd_text(0,0,31,0,String(points).c_str());
 }
 void checkSwapBuffer()
 {
@@ -531,7 +571,7 @@ void checkSwapBuffer()
 
 void loop()
 {
-  updatePlayer();   // update player position.
+  updatePlayer();    // update player position.
   updateGhosts();    // update all ghost position.
 
   draw();               // draw frame.
@@ -543,14 +583,11 @@ void loop()
 void Ghost::draw()
     {
        if (pacMan.powerup > 0)
-        GD.Vertex2ii(this->x,this->y,GHOSTHUNTBIG_HANDLE);
+        GD.Vertex2ii(level.x+this->x,level.y+this->y,GHOSTHUNT_HANDLE);
        else
-        GD.Vertex2ii(this->x,this->y,this->ghostState);
+        GD.Vertex2ii(level.x+this->x,level.y+this->y,this->ghostState);
     };
 
-Blinky::Blinky() {ghostState = REDGHOSTBIG_HANDLE; x =level.intersections[64].x ; y = level.intersections[64].y ;};
 
 void Blinky::update()
-{
-
-};
+{};
