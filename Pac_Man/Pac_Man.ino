@@ -29,8 +29,10 @@ public:
     void move();
 
     float x, y;
+    int sx, sy;
+    bool afraid = false;
     int ghostState;
-    int goalIntersect;
+    int goalIntersect = 64;
     int dir = 0;            // 0 = North, 1 = East, 2 = South, 3 = West, 4 = Stand.
 };
 
@@ -40,11 +42,13 @@ public:
     Blinky()
     {
         ghostState = REDGHOSTBIG_HANDLE;
-        x = 106;;
+        x = 106;
         y = 86;
+        sx = 106;
+        sy = 110;
     };
 
-    void Update(){};
+    void Update();
 };
 class Pinky: public Ghost //pink
 {
@@ -54,9 +58,11 @@ public:
         ghostState = PINKGHOSTBIG_HANDLE;
         x = 106;
         y = 110;
+        sx = 106;
+        sy = 110;
     };
 
-    void Update(){};
+    void Update();
 };
 class Inky: public Ghost //blue
 {
@@ -65,19 +71,22 @@ public:
     {
         ghostState = BLUEGHOSTBIG_HANDLE;
         x = 106 - PINKGHOSTBIG_WIDTH - 3, y = 110;
+        sx = 106;
+        sy = 110;
     };
 
-    void Update(){};
+    void Update();
 };
 class Clyde: public Ghost //orange
 {
 public:
     Clyde()
     {
-        goalIntersect = 23;
         ghostState = YELLOWGHOSTBIG_HANDLE;
         x = 106 + PINKGHOSTBIG_WIDTH + 3;
         y = 110;
+        sx = 106;
+        sy = 110;
     };
 
     void Update();
@@ -117,7 +126,7 @@ public:
     {}
 
     int x, y;
-    Intersection intersections[65];
+    Intersection intersections[67];
 };
 
 Player pacMan;
@@ -161,10 +170,10 @@ void buildMap()
     level.intersections[23] = Intersection(23, 92, 84, 17, 64, -1, 22);
     level.intersections[24] = Intersection(24, 116, 84, 18, 25, -1, 64);
     level.intersections[25] = Intersection(25, 139, 84, -1, -1, 28, 24);
-    level.intersections[26] = Intersection(26, 44, 108, 15, 27, 33, 29);
+    level.intersections[26] = Intersection(26, 44, 108, 15, 27, 33, 65);
     level.intersections[27] = Intersection(27, 68, 108, 22, -1, 30, 26);
     level.intersections[28] = Intersection(28, 139, 108, 25, 29, 31, -1);
-    level.intersections[29] = Intersection(29, 164, 108, 20, 26, 38, 28);
+    level.intersections[29] = Intersection(29, 164, 108, 20, 66, 38, 28);
     level.intersections[30] = Intersection(30, 68, 132, 27, 31, 34, -1);
     level.intersections[31] = Intersection(31, 139, 132, 28, -1, 37, 30);
     level.intersections[32] = Intersection(32, 4, 156, -1, 33, 40, -1);
@@ -177,7 +186,7 @@ void buildMap()
     level.intersections[39] = Intersection(39, 204, 156, -1, -1, 49, 38);
     level.intersections[40] = Intersection(40, 4, 180, 32, 41, -1, -1);
     level.intersections[41] = Intersection(41, 20, 180, -1, -1, 51, 40);
-    level.intersections[42] = Intersection(42, 44, 180, 33, 42, 52, -1);
+    level.intersections[42] = Intersection(42, 44, 180, 33, 43, 52, -1);
     level.intersections[43] = Intersection(43, 68, 180, -1, 44, 53, 42);
     level.intersections[44] = Intersection(44, 92, 180, 35, 45, -1, 43);
     level.intersections[45] = Intersection(45, 116, 180, 36, 46, -1, 44);
@@ -200,6 +209,8 @@ void buildMap()
     level.intersections[62] = Intersection(62, 116, 228, 55, 63, -1, 61);
     level.intersections[63] = Intersection(63, 204, 228, 59, -1, -1, 62);
     level.intersections[64] = Intersection(64, 104, 84, -1, 24, -1, 23);
+    level.intersections[65] = Intersection(65, 4, 108, -1, 26, -1, 66);
+    level.intersections[66] = Intersection(66, 204, 108, -1, 65, -1, 29);
 }
 
 #define ggr(x,y) for(int EnVariabelSomInteKommerFinnas = 0;EnVariabelSomInteKommerFinnas<x;EnVariabelSomInteKommerFinnas++){y;} 
@@ -426,9 +437,10 @@ void updatePlayer()
     }
 
     Intersection forward = level.intersections[pacMan.forward];
-
+    // pacman has reached intersection.
     if (pacMan.x == forward.x && pacMan.y == forward.y)
     {
+        // player has made legal turn.
         if (pacMan.dir == 0 && forward.north != -1)
         {
             pacMan.playerState = PACMANNORTHBIG_HANDLE;
@@ -457,6 +469,7 @@ void updatePlayer()
             pacMan.forward = forward.west;
             pacMan.idle = false;
         }
+            // player has not made legal turn and can not continue forward.
         else
         {
             if (pacMan.playerState == 0 && forward.north == -1)
@@ -464,25 +477,44 @@ void updatePlayer()
                 pacMan.idle = true;
                 pacMan.back = pacMan.forward;
             }
-            if (pacMan.playerState == 1 && forward.east == -1)
+            else if (pacMan.playerState == 1 && forward.east == -1)
             {
                 pacMan.idle = true;
                 pacMan.back = pacMan.forward;
             }
-            if (pacMan.playerState == 2 && forward.south == -1)
+            else if (pacMan.playerState == 2 && forward.south == -1)
             {
                 pacMan.idle = true;
                 pacMan.back = pacMan.forward;
             }
-            if (pacMan.playerState == 3 && forward.west == -1)
+            else if (pacMan.playerState == 3 && forward.west == -1)
             {
                 pacMan.idle = true;
                 pacMan.back = pacMan.forward;
             }
-            if (*forward.neighbours[pacMan.playerState] == -1)
+                // player has not made legal turn but can continue forward.
+            else
             {
-                pacMan.idle = true;
-                pacMan.back = pacMan.forward;
+                if (pacMan.playerState == 0)
+                {
+                    pacMan.back = pacMan.forward;
+                    pacMan.forward = forward.north;
+                }
+                else if (pacMan.playerState == 1)
+                {
+                    pacMan.back = pacMan.forward;
+                    pacMan.forward = forward.east;
+                }
+                else if (pacMan.playerState == 2)
+                {
+                    pacMan.back = pacMan.forward;
+                    pacMan.forward = forward.south;
+                }
+                else if (pacMan.playerState == 3)
+                {
+                    pacMan.back = pacMan.forward;
+                    pacMan.forward = forward.west;
+                }
             }
         }
     }
@@ -537,31 +569,19 @@ void updatePlayer()
     {
         if (pacMan.playerState == PACMANNORTHBIG_HANDLE) // North
         {
-            if (pacMan.y > 5)
-            {
-                pacMan.y -= speed;
-            }
+            pacMan.y -= speed;
         }
         else if (pacMan.playerState == PACMANEASTBIG_HANDLE) // East
         {
-            if (pacMan.x < MaxX - 14)
-            {
-                pacMan.x += speed;
-            }
+            pacMan.x += speed;
         }
         else if (pacMan.playerState == PACMANSOUTHBIG_HANDLE) // South
         {
-            if (pacMan.y < MaxY - 14)
-            {
-                pacMan.y += speed;
-            }
+            pacMan.y += speed;
         }
         else if (pacMan.playerState == PACMANWESTBIG_HANDLE) // West
         {
-            if (pacMan.x > 5)
-            {
-                pacMan.x -= speed;
-            }
+            pacMan.x -= speed;
         }
         const int dotIndex = floor((pacMan.x - 4) / 8) + floor((pacMan.y - 4) / 8) * 26;
         if (dots[dotIndex])
@@ -580,6 +600,20 @@ void updatePlayer()
         }
     }
 
+    if (pacMan.y == level.intersections[65].y)
+    {
+        if (pacMan.x == level.intersections[65].x - 14)
+        {
+            pacMan.x = level.intersections[66].x;
+            pacMan.y = level.intersections[66].y;
+        }
+        if (pacMan.x == level.intersections[66].x + 14)
+        {
+            pacMan.x = level.intersections[65].x;
+            pacMan.y = level.intersections[65].y;
+        }
+    }
+
     if (pacMan.powerup > 0)
         pacMan.powerup--;
 
@@ -591,9 +625,9 @@ void updatePlayer()
             pacMan.prevOpenState = pacMan.playerOpenState;
             pacMan.playerOpenState = 1;
         }
-        else if(pacMan.playerOpenState == 1)
+        else if (pacMan.playerOpenState == 1)
         {
-            if(pacMan.prevOpenState == 0)
+            if (pacMan.prevOpenState == 0)
             {
                 pacMan.playerOpenState = 2;
             }
@@ -611,6 +645,44 @@ void updatePlayer()
     else
     {
         pacMan.animationCounter++;
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if((pacMan.x + 14 > ghosts[i]->x && pacMan.x < ghosts[i]->x + 14) && (pacMan.y + 14 > ghosts[i]->y && pacMan.y < ghosts[i]->y + 14))
+        {
+            if (pacMan.powerup > 0)
+            {
+                ghosts[i]->x = ghosts[i]->sx;
+                ghosts[i]->y = ghosts[i]->sy;
+                ghosts[i]->goalIntersect = 64;
+                points += 100;
+            }
+            else
+            {
+                pacMan.playerState = BLACK_HANDLE;
+                speed = 0.0;
+            }
+        }
+    }
+
+}
+void drawMirrorPacMan()
+{
+    if(pacMan.y == level.intersections[65].y)
+    {
+        if (pacMan.x >= level.intersections[66].x)
+        {
+            int offset = pacMan.x - level.intersections[66].x;
+            offset = 14 - offset;
+            GD.Vertex2ii(level.x + level.intersections[65].x - offset, level.y + pacMan.y, pacMan.playerState, pacMan.playerOpenState);
+        }
+        else if (pacMan.x <= level.intersections[65].x)
+        {
+            int offset = level.intersections[65].x - pacMan.x;
+            offset = 14 - offset;
+            GD.Vertex2ii(level.x + level.intersections[66].x + offset, level.y + pacMan.y, pacMan.playerState, pacMan.playerOpenState);
+        }
     }
 }
 void updateGhosts()
@@ -633,10 +705,22 @@ void draw()
     GD.Clear();
     GD.Begin(BITMAPS);
     GD.Vertex2ii(level.x, level.y, 4);    //draw map in center of screen.
-    GD.Vertex2ii(level.x+pacMan.x, level.y+pacMan.y, pacMan.playerState, pacMan.playerOpenState); // draw pacMan
+    if(pacMan.playerState == BLACK_HANDLE)
+    {
+        GD.Vertex2ii(level.x+pacMan.x, level.y+pacMan.y, pacMan.playerState);
+    }
+    else
+    {
+        GD.Vertex2ii(level.x+pacMan.x, level.y+pacMan.y, pacMan.playerState, pacMan.playerOpenState); // draw pacMan
+    }
+    drawMirrorPacMan();
     drawDots();
     drawGhosts();
     GD.cmd_text(0,0,31,0,String(points).c_str());
+    GD.cmd_text(0,35,31,0,String(pacMan.forward).c_str());
+    GD.Vertex2ii(level.x + level.intersections[65].x - 14, level.y + level.intersections[65].y, BLACK_HANDLE);
+    GD.Vertex2ii(level.x + level.intersections[66].x + 14, level.y + level.intersections[66].y, BLACK_HANDLE);
+
 }
 void checkSwapBuffer()
 {
@@ -661,64 +745,286 @@ void loop()
 
 void Ghost::draw()
 {
-    if (pacMan.powerup > 0)
+    if (afraid)
         GD.Vertex2ii(level.x + this->x, level.y + this->y, GHOSTHUNTBIG_HANDLE);
     else
         GD.Vertex2ii(level.x + this->x, level.y + this->y, this->ghostState, this->dir);
-};
+}
 void Ghost::move()
 {
     Intersection forward = level.intersections[goalIntersect];
     if (forward.y < y)
     {
-        y -= speed;
+        y -= speed/2;
     }
     else if(forward.y > y)
     {
-        y += speed;
+        y += speed/2;
     }
     if(forward.x < x)
     {
-        x -= speed;
+        x -= speed/2;
     }
     else if(forward.x > x)
     {
-        x += speed;
+        x += speed/2;
     }
+}
+int further(int* test)
+{
+    int retIndex = -1;
+    float distans = 0.0;
+    for (int i = 0; i < 4; ++i)
+    {
+        if (test[i] == -1)
+        {
+            continue;
+        }
+        float x = pacMan.x - level.intersections[test[i]].x;
+        float y = pacMan.y - level.intersections[test[i]].y;
+        float cal = sqrt(x * x + y * y);
+        if (cal > distans)
+        {
+            distans = cal;
+            retIndex = test[i];
+        }
+    }
+    return retIndex;
+}
+int runAway(int current)
+{
+    Intersection currentIntersection = level.intersections[current];
+    int dir[] = {-1, -1, -1, -1};
+    if (currentIntersection.north != -1)
+    {
+        dir[0] = currentIntersection.north;
+    }
+    if (currentIntersection.east != -1)
+    {
+        dir[1] = currentIntersection.east;
+    }
+    if (currentIntersection.south != -1)
+    {
+        dir[2] = currentIntersection.south;
+    }
+    if (currentIntersection.west != -1)
+    {
+        dir[3] = currentIntersection.west;
+    }
+    return further(dir);
+}
+int closer(int* test, int target)
+{
+    int retIndex = -1;
+    float distans = 10000.0;
+    for (int i = 0; i < 4; ++i)
+    {
+        if (test[i] == -1)
+        {
+            continue;
+        }
+        float x = level.intersections[test[i]].x - level.intersections[target].x;
+        float y = level.intersections[test[i]].y - level.intersections[target].y;
+        float cal = sqrt(x * x + y * y);
+        if (cal < distans)
+        {
+            distans = cal;
+            retIndex = test[i];
+        }
+    }
+    if (retIndex != -1)
+    {
+        return retIndex;
+    }
+    else
+    {
+        return -1;
+    }
+}
+int PathFinder(int current, int target)
+{
+    Intersection currentIntersection = level.intersections[current];
+    int dir[] = {-1, -1, -1, -1};
+    if (currentIntersection.north != -1)
+    {
+        dir[0] = currentIntersection.north;
+    }
+    if (currentIntersection.east != -1)
+    {
+        dir[1] = currentIntersection.east;
+    }
+    if (currentIntersection.south != -1)
+    {
+        dir[2] = currentIntersection.south;
+    }
+    if (currentIntersection.west != -1)
+    {
+        dir[3] = currentIntersection.west;
+    }
+    return closer(dir, target);
 }
 
 void Clyde::Update()
 {
-    Intersection forward = level.intersections[this->goalIntersect];
-    
+    Intersection forward = level.intersections[goalIntersect];
+    afraid = pacMan.powerup > 0 ? true : false;
     if (x == forward.x && y == forward.y)
     {
-        do
+        if (afraid)
         {
-            dir = rand() % 4;
-            if (dir == 0 && forward.north != -1)
+            goalIntersect = runAway(goalIntersect);
+        }
+        else
+        {
+            do
             {
-                goalIntersect = forward.north;
-                break;
+                dir = rand() % 4;
+                if (dir == 0 && forward.north != -1)
+                {
+                    goalIntersect = forward.north;
+                    break;
+                }
+                else if (dir == 1 && forward.east != -1)
+                {
+                    goalIntersect = forward.east;
+                    break;
+                }
+                else if (dir == 2 && forward.south != -1)
+                {
+                    goalIntersect = forward.south;
+                    break;
+                }
+                else if (dir == 3 && forward.west != -1)
+                {
+                    goalIntersect = forward.west;
+                    break;
+                }
+            } while (true);
+        }
+    }
+    else
+    {
+        move();
+    }
+}
+void Blinky::Update()
+{
+    Intersection forward = level.intersections[goalIntersect];
+    afraid = pacMan.powerup > 0 ? true : false;
+    if (x == forward.x && y == forward.y)
+    {
+        if (afraid)
+        {
+            goalIntersect = runAway(goalIntersect);
+        }
+        else
+        {
+            if (goalIntersect != pacMan.back)
+            {
+                goalIntersect = PathFinder(goalIntersect, pacMan.back);
             }
-            else if (dir == 1 && forward.east != -1)
+            else
             {
-                goalIntersect = forward.east;
-                break;
-            }
-            else if (dir == 2 && forward.south != -1)
-            {
-                goalIntersect = forward.south;
-                break;
-            }
-            else if (dir == 3 && forward.west != -1)
-            {
-                goalIntersect = forward.west;
-                break;
+                goalIntersect = pacMan.forward;
             }
         }
-        while(true);
-        Serial.println(goalIntersect);
+    }
+    else
+    {
+        move();
+    }
+}
+void Pinky::Update()
+{
+    Intersection forward = level.intersections[goalIntersect];
+    afraid = pacMan.powerup > 0 ? true : false;
+    if (x == forward.x && y == forward.y)
+    {
+        if (afraid)
+        {
+            goalIntersect = runAway(goalIntersect);
+        }
+        else
+        {
+            if (goalIntersect != pacMan.forward)
+            {
+                goalIntersect = PathFinder(goalIntersect, pacMan.forward);
+            }
+            else
+            {
+                goalIntersect = pacMan.back;
+            }
+        }
+    }
+    else
+    {
+        move();
+    }
+}
+void Inky::Update()
+{
+    Intersection forward = level.intersections[goalIntersect];
+    afraid = pacMan.powerup > 0 ? true : false;
+    if (x == forward.x && y == forward.y)
+    {
+        if (afraid)
+        {
+            goalIntersect = runAway(goalIntersect);
+        }
+        else
+        {
+            int choice = rand() % 3;
+            if (choice == 0)
+            {
+                if (goalIntersect != pacMan.back)
+                {
+                    goalIntersect = PathFinder(goalIntersect, pacMan.back);
+                }
+                else
+                {
+                    goalIntersect = pacMan.forward;
+                }
+            }
+            else if (choice == 1)
+            {
+                if (goalIntersect != pacMan.forward)
+                {
+                    goalIntersect = PathFinder(goalIntersect, pacMan.forward);
+                }
+                else
+                {
+                    goalIntersect = pacMan.back;
+                }
+            }
+            else if (choice == 2)
+            {
+                do
+                {
+                    dir = rand() % 4;
+                    if (dir == 0 && forward.north != -1)
+                    {
+                        goalIntersect = forward.north;
+                        break;
+                    }
+                    else if (dir == 1 && forward.east != -1)
+                    {
+                        goalIntersect = forward.east;
+                        break;
+                    }
+                    else if (dir == 2 && forward.south != -1)
+                    {
+                        goalIntersect = forward.south;
+                        break;
+                    }
+                    else if (dir == 3 && forward.west != -1)
+                    {
+                        goalIntersect = forward.west;
+                        break;
+                    }
+                } while (true);
+                Serial.println(goalIntersect);
+            }
+        }
     }
     else
     {

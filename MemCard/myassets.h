@@ -1,5 +1,5 @@
 // This file was generated with the command-line:
-//    /usr/local/bin/gd2asset -f myassets.gd2 -o myassets.h PacManNorthBig.png PacManEastBig.png PacManSouthBig.png PacManWestBig.png levelOne.jpg DotBig.png PowerUpBig.png RedGhostBig.png YellowGhostBig.png BlueGhostBig.png PinkGhostBig.png GhostHuntBig.png
+//    /usr/local/bin/gd2asset -f myassets.gd2 -o myassets.h PacManNorthBig.png PacManEastBig.png PacManSouthBig.png PacManWestBig.png levelOne.jpg DotBig.png PowerUpBig.png RedGhostBig.png YellowGhostBig.png BlueGhostBig.png PinkGhostBig.png GhostHuntBig.png Black.png
 
 #define PACMANNORTHBIG_HANDLE 0
 #define PACMANNORTHBIG_WIDTH 14
@@ -49,7 +49,11 @@
 #define GHOSTHUNTBIG_WIDTH 14
 #define GHOSTHUNTBIG_HEIGHT 14
 #define GHOSTHUNTBIG_CELLS 1
-#define ASSETS_END 123256UL
+#define BLACK_HANDLE 12
+#define BLACK_WIDTH 14
+#define BLACK_HEIGHT 14
+#define BLACK_CELLS 1
+#define ASSETS_END 123648UL
 #define LOAD_ASSETS()  (GD.safeload("myassets.gd2"), GD.loadptr = ASSETS_END)
 static const shape_t PACMANNORTHBIG_SHAPE = {0, 14, 42, 0};
 static const shape_t PACMANEASTBIG_SHAPE = {1, 14, 42, 0};
@@ -63,6 +67,7 @@ static const shape_t YELLOWGHOSTBIG_SHAPE = {8, 14, 56, 0};
 static const shape_t BLUEGHOSTBIG_SHAPE = {9, 14, 56, 0};
 static const shape_t PINKGHOSTBIG_SHAPE = {10, 14, 56, 0};
 static const shape_t GHOSTHUNTBIG_SHAPE = {11, 14, 14, 0};
+static const shape_t BLACK_SHAPE = {12, 14, 14, 0};
 struct {
   Bitmap pacmannorthbig;
   Bitmap pacmaneastbig;
@@ -76,6 +81,7 @@ struct {
   Bitmap blueghostbig;
   Bitmap pinkghostbig;
   Bitmap ghosthuntbig;
+  Bitmap black;
 } bitmaps = {
  /*   pacmannorthbig */  {{ 14,  42}, {  7,  21},      0x0UL,  6,  0},
  /*    pacmaneastbig */  {{ 14,  42}, {  7,  21},    0x498UL,  6,  1},
@@ -88,5 +94,6 @@ struct {
  /*   yellowghostbig */  {{ 14,  56}, {  7,  28},  0x1cd90UL,  6,  8},
  /*     blueghostbig */  {{ 14,  56}, {  7,  28},  0x1d3b0UL,  6,  9},
  /*     pinkghostbig */  {{ 14,  56}, {  7,  28},  0x1d9d0UL,  6, 10},
- /*     ghosthuntbig */  {{ 14,  14}, {  7,   7},  0x1dff0UL,  6, 11}
+ /*     ghosthuntbig */  {{ 14,  14}, {  7,   7},  0x1dff0UL,  6, 11},
+ /*            black */  {{ 14,  14}, {  7,   7},  0x1e178UL,  6, 12}
 };
